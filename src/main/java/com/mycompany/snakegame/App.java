@@ -15,10 +15,15 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("SnakeView.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("SnakeView.fxml"));
+        Parent root = fxmlLoader.load();
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+        
+        FXMLController fxmlController = fxmlLoader.getController();
+        SnakeController.getInstancia().adicionarFXMLController(fxmlController);
+        
     }
 
     public static void main(String[] args) {

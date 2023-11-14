@@ -1,5 +1,6 @@
 package com.mycompany.snakegame;
 
+import java.awt.Point;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.value.ChangeListener;
@@ -74,10 +75,19 @@ public class FXMLController implements Initializable{
 
     @FXML
     void salvarRecorde(ActionEvent event) {
-        //snakeController.inserirRecorde(textFieldNome.getText(), pontos);
+        snakeController.inserirRecorde(textFieldNome.getText(), pontos);
         buttonSalvarRecorde.setVisible(false);
         pontos = 0;
     }
+    
+    public double getCanvasLargura() {
+        return canvasGrafico.getWidth();
+    }
+    
+    public double getCanvasAltura() {
+        return canvasGrafico.getHeight();
+    }
+    
     public void notificaNovoRecorde(int pontos) {
         this.pontos = pontos;
         labelMensagem.setText("Novo recorde de " + pontos + " pontos!");
@@ -104,6 +114,8 @@ public class FXMLController implements Initializable{
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
+        
         buttonFecharJogo.setVisible(false);
         buttonSalvarRecorde.setVisible(false);
         jogoFechado = true;
