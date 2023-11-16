@@ -1,13 +1,14 @@
 package com.mycompany.snakegame;
 
-import java.awt.Point;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.geometry.Point2D;
+import javafx.scene.input.KeyCode;
 
 public class SnakeLogic extends Thread implements ViewObserver {
 
@@ -21,6 +22,8 @@ public class SnakeLogic extends Thread implements ViewObserver {
     private double larguraJogo;
     private double alturaJogo;
     private double areaJogo;
+    private double xMargem;
+    private double yMargem;
     
     public final Point2D DIREITA;
     public final Point2D ESQUERDA;
@@ -46,8 +49,10 @@ public class SnakeLogic extends Thread implements ViewObserver {
         snakeController = SnakeController.getInstancia();
         unidadeLargura = 30;
         unidadeAltura = 30;
-        alturaJogo = snakeController.getCanvasAltura() / unidadeAltura;
-        larguraJogo = snakeController.getCanvasLargura() / unidadeLargura;
+        xMargem = 20;
+        yMargem = 20;
+        alturaJogo = (snakeController.getCanvasAltura() - 2*xMargem) / unidadeAltura;
+        larguraJogo = (snakeController.getCanvasLargura() - 2*yMargem) / unidadeLargura;
         
         jogoFechado = true;
         novoJogo = false;
@@ -74,18 +79,29 @@ public class SnakeLogic extends Thread implements ViewObserver {
         return unidadeAltura;
     }
 
+    public double getXMargem() {
+        return xMargem;
+    }
+
+    public double getYMargem() {
+        return yMargem;
+    }
+
     @Override
     public void run() {
         
         
         taxaAumento = (float) (DIFERENCA_VELOCIDADE_POR_DIFICULDADE * NIVEIS_SUBIDOS_EM_UM_JOGO / areaJogo);
-        
+        int pontos;
 
         while (!viewFechada) {
 
-            esperarNovoJogo();
+            esperarAtualizacaoJogo();
+            if(viewFechada) {
+                break;
+            }
             
-            int pontos = gameLoop();
+            pontos = gameLoop();
             
             if (cobrinha.getTamanho() == areaJogo) {
                 snakeController.venceuOJogo();
@@ -119,6 +135,7 @@ public class SnakeLogic extends Thread implements ViewObserver {
                 snakeController.perdeuOJogo();
                 break;
             }
+            
 
             if (posicoesMaca.contains(cobrinha.getCabeca())) {
                 pontos += macaGrande ? 4 : 1;
@@ -132,9 +149,8 @@ public class SnakeLogic extends Thread implements ViewObserver {
             else {
                 posicoesMacaComida = null;
             }
-            
 
-            if (qtdCrescer >0) {
+            if (qtdCrescer > 0) {
                 cobrinha.crescerCobrinha();
             }
             
@@ -180,14 +196,12 @@ public class SnakeLogic extends Thread implements ViewObserver {
         return direcaoTeclado;
     }
 
-    private void esperarNovoJogo() {
+    private void esperarAtualizacaoJogo() {
         synchronized (lock) {
-            while (!novoJogo) {
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-
-                }
+            try {
+                lock.wait();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(SnakeLogic.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         novoJogo = false;
@@ -195,49 +209,42 @@ public class SnakeLogic extends Thread implements ViewObserver {
 
     private List<Point2D> gerarPosicaoMaca(boolean macaGrande) {
         double x, y;
-        Point2D posMaca = new Point2D(0, 0);
+        Point2D posMaca;
         List<Point2D> posicoesMaca;
 
         do {
             x = unidadeLargura * random.nextInt((int) larguraJogo - (macaGrande ? 1 : 0));
             y = unidadeAltura * random.nextInt((int) alturaJogo - (macaGrande ? 1 : 0));
-            posMaca.add(x, y);
+            posMaca = new Point2D(x, y);
             
-            posicoesMaca = new ArrayList<>() {
-                {
-                    add(posMaca);
-                    if (macaGrande) {
-                        add(new Point2D(posMaca.getX() + unidadeLargura, posMaca.getY()));
-                        add(new Point2D(posMaca.getX(), posMaca.getY() + unidadeAltura));
-                        add(new Point2D(posMaca.getX() + unidadeLargura, posMaca.getY() + unidadeAltura));
-                    }
-                }
-            };
-        } while (isPosicaoMacaValida(posicoesMaca));
+            posicoesMaca = new ArrayList();
+            posicoesMaca.add(posMaca);
+            if (macaGrande) {
+                posicoesMaca.add(new Point2D(posMaca.getX() + unidadeLargura, posMaca.getY()));
+                posicoesMaca.add(new Point2D(posMaca.getX(), posMaca.getY() + unidadeAltura));
+                posicoesMaca.add(new Point2D(posMaca.getX() + unidadeLargura, posMaca.getY() + unidadeAltura));
+            }
+        } while (!isPosicaoMacaValida(posicoesMaca));
 
         return posicoesMaca;
     }
 
     private boolean isPosicaoMacaValida(List<Point2D> posicoesMaca) {
         for (Point2D pm : posicoesMaca) {
-            if (cobrinha.checaColisaoPonto(pm) && !cobrinha.getCabeca().equals(pm)) {
-                return true;
+            if (cobrinha.checaColisaoPonto(pm)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     @Override
-    public void keyPressed(int keyCode) {
+    public void keyPressed(KeyCode keyCode) {
         switch (keyCode) {
-            case KeyEvent.VK_UP, KeyEvent.VK_W ->
-                direcoesTeclado.offer(CIMA);
-            case KeyEvent.VK_DOWN, KeyEvent.VK_S ->
-                direcoesTeclado.offer(BAIXO);
-            case KeyEvent.VK_LEFT, KeyEvent.VK_A ->
-                direcoesTeclado.offer(ESQUERDA);
-            case KeyEvent.VK_RIGHT, KeyEvent.VK_D ->
-                direcoesTeclado.offer(DIREITA);
+            case UP, W -> direcoesTeclado.offer(CIMA);
+            case DOWN, S -> direcoesTeclado.offer(BAIXO);
+            case LEFT, A -> direcoesTeclado.offer(ESQUERDA);
+            case RIGHT, D -> direcoesTeclado.offer(DIREITA);
         }
         if (direcoesTeclado.size() == 3) {
             direcoesTeclado.poll();
@@ -260,10 +267,17 @@ public class SnakeLogic extends Thread implements ViewObserver {
     @Override
     public void fecharJogo() {
         jogoFechado = true;
+        synchronized (lock) {
+            lock.notify();
+        }
     }
 
     @Override
     public void viewFechada() {
+        jogoFechado = true;
         viewFechada = true;
+        synchronized (lock) {
+            lock.notify();
+        }
     }
 }

@@ -7,12 +7,14 @@ package com.mycompany.snakegame;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Point2D;
+import javafx.scene.input.KeyCode;
 
 public class SnakeController {
     
     private static SnakeController snakeController;
-    private static FXMLController fxmlController;
-    private static DesenhoCampoJogo desenhoCampoJogo;
+    private SnakeFXMLController snakeFxmlController;
+    private DesenhoCampoJogo desenhoCampoJogo;
+    private SnakeLogic snakeLogic;
     
     private final List<ViewObserver> observers;
     
@@ -28,74 +30,103 @@ public class SnakeController {
         observers = new ArrayList<>();
     }
     
-    public void adicionarFXMLController(FXMLController fxmlController) {
-        this.fxmlController = fxmlController;
+    public void adicionarSnakeFXMLController(SnakeFXMLController snakeFxmlController) {
+        this.snakeFxmlController = snakeFxmlController;
     }
     
     public void adicionarObserver(ViewObserver observer) {
         observers.add(observer);
-    }
-    
-    public double getCanvasLargura() {
-        return fxmlController.getCanvasLargura();
-    }
-    
-    public double getCanvasAltura() {
-        return fxmlController.getCanvasAltura();
-    }
-    
-    public double getUnidadeLargura() {
-        return ((SnakeLogic) observers.get(0)).getUnidadeLargura();
-    }
-    
-    public double getUnidadeAltura() {
-        return ((SnakeLogic) observers.get(0)).getUnidadeAltura();
+        if(observer instanceof SnakeLogic) {
+            snakeLogic = (SnakeLogic) observer;
+        }
     }
 
     public void removerObserver(ViewObserver observer) {
         observers.remove(observer);
+        if(observer instanceof SnakeLogic) {
+            snakeLogic = null;
+        }
     }
     
-    public void keyPressed(int keyCode) {
+    public void adicionarDesenhoCampoJogo(DesenhoCampoJogo desenhoCampoJogo) {
+        this.desenhoCampoJogo = desenhoCampoJogo;
+    }
+    
+    public double getCanvasLargura() {
+        return snakeFxmlController.getCanvasLargura();
+    }
+    
+    public double getCanvasAltura() {
+        return snakeFxmlController.getCanvasAltura();
+    }
+    
+    public double getUnidadeLargura() {
+        return snakeLogic.getUnidadeLargura();
+    }
+    
+    public double getUnidadeAltura() {
+        return snakeLogic.getUnidadeAltura();
+    }
+    
+    public double getXMargem() {
+        return snakeLogic.getXMargem();
+    }
+    
+    public double getYMargem() {
+        return snakeLogic.getYMargem();
+    }
+    
+    public void keyPressed(KeyCode keyCode) {
         for(ViewObserver o: observers) {
             o.keyPressed(keyCode);
         }
     }
-    
 
-    void fecharJogo() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void fecharJogo() {
+        for(ViewObserver o: observers) {
+            o.fecharJogo();
+        }
     }
 
-    void novoJogoCampo() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void novoJogoCampo() {
+        desenhoCampoJogo.novoJogo();
     }
 
-    void novoJogo(int dificuldade, boolean selected) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void novoJogo(int dificuldade, boolean atravessarBordas) {
+        for(ViewObserver o: observers) {
+            o.novoJogo(dificuldade, atravessarBordas);
+        }
     }
 
-    void inserirRecorde(String text, int pontos) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void inserirRecorde(String nome, int pontos) {
+        GerenciadorRecordes.getInstancia().inserirRecorde(nome, pontos);
     }
 
-    void venceuOJogo() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void venceuOJogo() {
+        snakeFxmlController.venceuOJogo();
     }
 
-    void notificaNovoRecordeSeFor(int pontos) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void notificaNovoRecordeSeFor(int pontos) {
+        if (GerenciadorRecordes.getInstancia().isNovoRecorde(pontos)) {
+            snakeFxmlController.notificaNovoRecorde(pontos);
+        }
     }
 
-    void atualizarNumMaca(int i) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void atualizarNumMaca(int comidas) {
+        snakeFxmlController.atualizarNumMaca(comidas);
     }
 
-    void perdeuOJogo() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void perdeuOJogo() {
+        snakeFxmlController.perdeuOJogo();
     }
 
-    void desenharJogo(Cobrinha cobrinha, boolean b, List<Point2D> posicoesMacaComida, List<Point2D> posicoesMaca) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void desenharJogo(Cobrinha cobrinha, boolean crescendo, List<Point2D> posicoesMacaComida, List<Point2D> posicoesMaca) {
+        desenhoCampoJogo.desenharJogo(cobrinha, crescendo, posicoesMacaComida, posicoesMaca);
+    }
+
+    public void viewFechada() {
+        for(ViewObserver o: observers) {
+            o.viewFechada();
+        }
     }
 }

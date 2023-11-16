@@ -1,7 +1,6 @@
 
 package com.mycompany.snakegame;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,8 +33,8 @@ public class Cobrinha {
         
         unidadeLargura = snakeController.getUnidadeLargura();
         unidadeAltura = snakeController.getUnidadeAltura();
-        larguraJogo = snakeController.getCanvasLargura() / unidadeLargura;
-        alturaJogo = snakeController.getCanvasLargura() / unidadeAltura;
+        larguraJogo = (snakeController.getCanvasLargura() - 2 * snakeController.getXMargem()) / unidadeLargura;
+        alturaJogo = (snakeController.getCanvasAltura() - 2 * snakeController.getYMargem() ) / unidadeAltura;
         
         DIREITA = new Point2D(unidadeLargura, 0);
         ESQUERDA = new Point2D(-unidadeLargura, 0);
@@ -53,12 +52,44 @@ public class Cobrinha {
         return corpoCobrinha;
     }
     
+    public Map<Point2D, Point2D> getDirecoesCobrinha() {
+        return direcoesCobrinha;
+    }
+    
     public Point2D getCabeca() {
         return corpoCobrinha.get(0);
     }
     
-    public Map<Point2D, Point2D> getDirecoesCobrinha() {
-        return direcoesCobrinha;
+    public Point2D getPrimeiraCauda() {
+        return corpoCobrinha.get(1);
+    }
+    
+    public Point2D getPenultimaCauda() {
+        return corpoCobrinha.get(corpoCobrinha.size()-2);
+    }
+    
+    public Point2D getCaudaPonta() {
+        return corpoCobrinha.get(corpoCobrinha.size()-1);
+    }
+    
+    public Point2D getCabecaDirecao() {
+        return direcoesCobrinha.get(corpoCobrinha.get(0));
+    }
+    
+    public Point2D getPrimeiraCaudaDirecao() {
+        return direcoesCobrinha.get(corpoCobrinha.get(1));
+    }
+    
+    public Point2D getPenultimaCaudaDirecao() {
+        return direcoesCobrinha.get(corpoCobrinha.get(corpoCobrinha.size()-2));
+    }
+    
+    public Point2D getCaudaPontaDirecao() {
+        return direcoesCobrinha.get(corpoCobrinha.get(corpoCobrinha.size()-1));
+    }
+    
+    public Point2D getDirecao(Point2D ponto) {
+        return direcoesCobrinha.get(ponto);
     }
     
     public Point2D getPontoRemovido() {

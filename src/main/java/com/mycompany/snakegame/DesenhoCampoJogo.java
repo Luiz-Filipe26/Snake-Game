@@ -1,24 +1,19 @@
 
 package com.mycompany.snakegame;
 
-import java.awt.Point;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
-import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
-import javax.imageio.ImageIO;
 
 /**
  *
@@ -46,34 +41,37 @@ public class DesenhoCampoJogo {
     private GraphicsContext gBuffer;
     private Image imagemCompleta;
     
-    private HashMap<ArrayList<Point2D>, Point> mapaCauda ;
-    private HashMap<Point2D, Point> mapaCaudaPonta;
-    private HashMap<Point2D, Point> mapaCabeca;
-    private HashMap<Point, Image> mapaImagens;
+    private Map<List<Point2D>, Ponto> mapaCauda ;
+    private Map<Point2D, Ponto> mapaCaudaPonta;
+    private Map<Point2D, Ponto> mapaCabeca;
+    private Map<Ponto, Image> mapaImagens;
     
     
     public static synchronized DesenhoCampoJogo getInstancia() {
+        return getInstancia(null);
+    }
+    
+    public static synchronized DesenhoCampoJogo getInstancia(GraphicsContext graphicsContext) {
         if (desenhoCampoJogo == null) {
-            desenhoCampoJogo = new DesenhoCampoJogo();
+            desenhoCampoJogo = new DesenhoCampoJogo(graphicsContext);
         }
         return desenhoCampoJogo;
     }
     
     public void setGraphicsContext(GraphicsContext graphicsContext) {
         gc = graphicsContext;
-        gc.setFill(Color.BLUE);
     }
     
-    private DesenhoCampoJogo() {
-        
+    private DesenhoCampoJogo(GraphicsContext graphicsContext) {
+        gc = graphicsContext;
         snakeController = SnakeController.getInstancia();
         
         unidadeLargura = snakeController.getUnidadeLargura();
         unidadeAltura = snakeController.getUnidadeAltura();
-        xMargem = 20;
-        yMargem = 20;
-        larguraJogo = snakeController.getCanvasLargura() - (snakeController.getCanvasLargura() % (2 * xMargem));
-        alturaJogo = snakeController.getCanvasAltura() - (snakeController.getCanvasAltura() % (2 * yMargem));
+        xMargem = snakeController.getXMargem();
+        yMargem = snakeController.getYMargem();
+        larguraJogo = snakeController.getCanvasLargura() - 2 * xMargem;
+        alturaJogo = snakeController.getCanvasAltura() - 2 * yMargem;
         
         DIREITA = new Point2D(unidadeLargura, 0);
         ESQUERDA = new Point2D(-unidadeLargura, 0);
@@ -81,7 +79,6 @@ public class DesenhoCampoJogo {
         BAIXO = new Point2D(0, unidadeAltura);
         
         imagemCompleta = new Image(getClass().getResourceAsStream("snake-graphics.png"));
-        buffer = new Canvas(larguraJogo, alturaJogo);
         
         inicializarMaps();
         inicializarDesenho();
@@ -90,65 +87,82 @@ public class DesenhoCampoJogo {
     public void inicializarMaps() {
         mapaCauda = new HashMap<>();
         Object[][] equivalenciasCauda = {
-                {DIREITA, DIREITA, new Point(1, 0)},
-                {CIMA, CIMA, new Point(2, 1)},
-                {ESQUERDA, CIMA, new Point(0, 1)},
-                {CIMA, DIREITA, new Point(0, 0)},
-                {DIREITA, BAIXO, new Point(2, 0)},
-                {BAIXO, ESQUERDA, new Point(2, 2)}
+                {DIREITA, DIREITA, new Ponto(1, 0)},
+                {CIMA, CIMA, new Ponto(2, 1)},
+                {ESQUERDA, CIMA, new Ponto(0, 1)},
+                {CIMA, DIREITA, new Ponto(0, 0)},
+                {DIREITA, BAIXO, new Ponto(2, 0)},
+                {BAIXO, ESQUERDA, new Ponto(2, 2)}
         };
 
         for (Object[] equivalencia : equivalenciasCauda) {
-            ArrayList<Point2D> linhaPonto = new ArrayList<>();
+            List<Point2D> linhaPonto = new ArrayList<>();
             linhaPonto.add((Point2D) equivalencia[0]);
             linhaPonto.add((Point2D) equivalencia[1]);
-            mapaCauda.put(linhaPonto, (Point) equivalencia[2]);
+            mapaCauda.put(linhaPonto, (Ponto) equivalencia[2]);
         }
         
         mapaCaudaPonta = new HashMap<>();
-        mapaCaudaPonta.put(CIMA, new Point(3, 2));
-        mapaCaudaPonta.put(DIREITA, new Point(4, 2));
-        mapaCaudaPonta.put(ESQUERDA, new Point(3, 3));
-        mapaCaudaPonta.put(BAIXO, new Point(4, 3));
+        mapaCaudaPonta.put(CIMA, new Ponto(3, 2));
+        mapaCaudaPonta.put(DIREITA, new Ponto(4, 2));
+        mapaCaudaPonta.put(ESQUERDA, new Ponto(3, 3));
+        mapaCaudaPonta.put(BAIXO, new Ponto(4, 3));
 
         mapaCabeca = new HashMap<>();
-        mapaCabeca.put(CIMA, new Point(3, 0));
-        mapaCabeca.put(DIREITA, new Point(4, 0));
-        mapaCabeca.put(ESQUERDA, new Point(3, 1));
-        mapaCabeca.put(BAIXO, new Point(4, 1));
+        mapaCabeca.put(CIMA, new Ponto(3, 0));
+        mapaCabeca.put(DIREITA, new Ponto(4, 0));
+        mapaCabeca.put(ESQUERDA, new Ponto(3, 1));
+        mapaCabeca.put(BAIXO, new Ponto(4, 1));
 
         mapaImagens = new HashMap<>();
-        PixelReader pixelReader = imagemCompleta.getPixelReader();
         
         for (int x = 0; x < imagemCompleta.getWidth(); x += 64) {
             for (int y = 0; y < imagemCompleta.getHeight(); y += 64) {
-                Point coordenadas = new Point(x/64, y/64);
+                Ponto coordenadas = new Ponto(x/64, y/64);
                 if(coordenadas.x==1 && coordenadas.y==2) {
-                    WritableImage subImagem = new WritableImage(pixelReader, x, y, 64, 64);
-                    Image imagemRedimensionada = new WritableImage(subImagem.getPixelReader(), (int) xMargem, (int) yMargem);
+                    Image subImagem = cortarImagem(imagemCompleta, x, y, 64, 64);
+                    Image imagemRedimensionada = redimensionarImagem(subImagem, xMargem, yMargem);
                     mapaImagens.put(coordenadas, imagemRedimensionada);
                 }
                 else if(coordenadas.x==0 && coordenadas.y==2) {
-                    WritableImage subImagem = new WritableImage(pixelReader, x, y+64, 64, 64);
-                    Image imagemRedimensionada = new WritableImage(subImagem.getPixelReader(), (int) unidadeLargura*2, (int) unidadeAltura*2);
+                    Image subImagem = cortarImagem(imagemCompleta, x, y+64, 64, 64);
+                    Image imagemRedimensionada = redimensionarImagem(subImagem, unidadeLargura*2, unidadeAltura*2);
                     mapaImagens.put(coordenadas, imagemRedimensionada);
                 }
                 else {
-                    WritableImage subImagem = new WritableImage(pixelReader, x, y, 64, 64);
-                    Image imagemRedimensionada = new WritableImage(subImagem.getPixelReader(), (int) unidadeLargura, (int) unidadeAltura);
+                    Image subImagem = cortarImagem(imagemCompleta, x, y, 64, 64);
+                    Image imagemRedimensionada = redimensionarImagem(subImagem, unidadeLargura, unidadeAltura);
                     mapaImagens.put(coordenadas, imagemRedimensionada);
                 }
             }
         }
     }
     
-     private void inicializarDesenho() {
-        double largura = 2*xMargem + larguraJogo * unidadeLargura;
-        double altura = 2*yMargem + alturaJogo * unidadeAltura;
+    private Image cortarImagem(Image imagemOriginal, int x, int y, int dx, int dy) {
+        PixelReader pixelReader = imagemOriginal.getPixelReader();
+        Image imagemCortada = new WritableImage(pixelReader, x, y, dx, dy);
+        return imagemCortada;
+    }
+    
+    private Image redimensionarImagem(Image imagemOriginal, double novaLargura, double novaAltura) {
+        ImageView imageView = new ImageView(imagemOriginal);
+        imageView.setSmooth(true);
+        imageView.setPreserveRatio(true);
+        imageView.setFitWidth(novaLargura);
+        imageView.setFitHeight(novaAltura);
+        
+        Image imagemRedimensionada = imageView.snapshot(null, null);
+        return imagemRedimensionada;
+    }
+    
+    private void inicializarDesenho() {
+        double largura = 2*xMargem + larguraJogo;
+        double altura = 2*yMargem + alturaJogo;
+        buffer = new Canvas(larguraJogo, alturaJogo);
         gBuffer = buffer.getGraphicsContext2D();
         
         
-        Image imagemFundo = mapaImagens.get(new Point(1, 2));
+        Image imagemFundo = mapaImagens.get(new Ponto(1, 2));
         for(int x=0; x<largura; x+=xMargem) {
             gc.drawImage(imagemFundo, x, 0);
             gc.drawImage(imagemFundo, x, altura-yMargem);
@@ -160,25 +174,21 @@ public class DesenhoCampoJogo {
         }
 
         gBuffer.setFill(Color.WHITE);
-        gBuffer.fillRect(0, 0, largura- 2*xMargem, altura- 2*yMargem);
+        gBuffer.fillRect(0, 0, larguraJogo, alturaJogo);
         gc.drawImage(buffer.snapshot(null, null), xMargem, yMargem);
     }
     
     public void novoJogo() {
         gBuffer.setFill(Color.WHITE);
         gBuffer.fillRect(0, 0, (unidadeLargura*larguraJogo), (unidadeAltura*alturaJogo));
-        gc.drawImage(buffer.snapshot(null, null), xMargem, yMargem);
+        
+        Platform.runLater(() -> {
+            gc.drawImage(buffer.snapshot(null, null), xMargem, yMargem);
+        });
     }
     
     public synchronized void desenharJogo(Cobrinha cobrinha, boolean crescendo, List<Point2D> posicoesMacaComida, List<Point2D> posicoesMaca) {   
-        List<Point2D> corpoCobrinha = cobrinha.getCorpoCobrinha();
-        Map<Point2D, Point2D> direcoesCobrinha = cobrinha.getDirecoesCobrinha();
-        
-        Point2D cabeca = corpoCobrinha.get(0);
-        Point2D cauda = corpoCobrinha.get(1);
-        Point2D caudaPosterior = corpoCobrinha.get(corpoCobrinha.size() - 2);
-        Point2D caudaPonta = corpoCobrinha.get(corpoCobrinha.size() - 1);
-        
+                
         if (!crescendo) {
             desenhaPonto(cobrinha.getPontoRemovido());
         }
@@ -191,26 +201,28 @@ public class DesenhoCampoJogo {
         
         if(posicoesMaca != null) {
             if(posicoesMaca.size() == 1) {
-                desenhaPontoImagem(mapaImagens.get(new Point(0, 3)), posicoesMaca.get(0));
+                desenhaPontoImagem(mapaImagens.get(new Ponto(0, 3)), posicoesMaca.get(0));
             }
             else if(posicoesMaca.size() == 4) {
-                desenhaPontoImagem(mapaImagens.get(new Point(0, 2)), posicoesMaca.get(0));
+                desenhaPontoImagem(mapaImagens.get(new Ponto(0, 2)), posicoesMaca.get(0));
             }
         }
 
-        desenhaPontoImagem(getCabecaImagem(direcoesCobrinha.get(cabeca)), cabeca);
+        desenhaPontoImagem(getCabecaImagem(cobrinha.getCabecaDirecao()), cobrinha.getCabeca());
         
-        desenhaPonto(cauda);
+        desenhaPonto(cobrinha.getPrimeiraCauda());
         desenhaPontoImagem(getCaudaImagem(
                 new ArrayList(){{
-                    add(direcoesCobrinha.get(cauda));
-                    add(direcoesCobrinha.get(cabeca));
-                }}), cauda);
+                    add(cobrinha.getPrimeiraCaudaDirecao());
+                    add(cobrinha.getCabecaDirecao());
+                }}), cobrinha.getPrimeiraCauda());
         
-        desenhaPonto(caudaPonta);
-        desenhaPontoImagem(getCaudaPontaImagem(direcoesCobrinha.get(caudaPosterior)), caudaPonta);
+        desenhaPonto(cobrinha.getCaudaPonta());
+        desenhaPontoImagem(getCaudaPontaImagem(cobrinha.getPenultimaCaudaDirecao()), cobrinha.getCaudaPonta());
         
-        gc.drawImage(buffer.snapshot(null, null), xMargem, yMargem);
+        Platform.runLater(() -> {
+            gc.drawImage(buffer.snapshot(null, null), xMargem, yMargem);
+        });
     }
     
     private void desenhaPontoImagem(Image im, Point2D p) {
@@ -222,12 +234,12 @@ public class DesenhoCampoJogo {
     }
     
     private Image getCabecaImagem(Point2D direcao) {        
-        Point lugarImagem = mapaCabeca.get(direcao);
+        Ponto lugarImagem = mapaCabeca.get(direcao);
         return mapaImagens.get(lugarImagem);
     }
     
     private Image getCaudaImagem(List<Point2D> direcoes) {
-        Point lugarImagem = mapaCauda.get(direcoes);
+        Ponto lugarImagem = mapaCauda.get(direcoes);
         if(lugarImagem == null) {
             lugarImagem = mapaCauda.get(new ArrayList() {{
                 add(new Point2D(-direcoes.get(1).getX(), -direcoes.get(1).getY()));
@@ -239,7 +251,7 @@ public class DesenhoCampoJogo {
     }
     
     private Image getCaudaPontaImagem(Point2D direcao) {
-        Point lugarImagem = mapaCaudaPonta.get(direcao);
+        Ponto lugarImagem = mapaCaudaPonta.get(direcao);
         return mapaImagens.get(lugarImagem);
     }
 }

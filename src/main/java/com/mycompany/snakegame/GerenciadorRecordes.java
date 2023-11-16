@@ -1,121 +1,112 @@
 package com.mycompany.snakegame;
 
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class GerenciadorRecordes {
     private static GerenciadorRecordes gr;
     private final int MAX_RECORDS = 5;
-    private final String DATA_FOLDER = System.getProperty("user.home") + File.separator + "snake-data";
-    private final String FILE_PATH = DATA_FOLDER + File.separator + "recordes.txt";
 
     public static GerenciadorRecordes getInstancia() {
-        if(gr == null) {
+        if (gr == null) {
             gr = new GerenciadorRecordes();
         }
         return gr;
     }
 
-    private GerenciadorRecordes() {}
+    private GerenciadorRecordes() {
+        //Criar tabela de recordes se não existir
+        try (Connection con = Conexao.obterConexao();
+            Statement stmt = con.createStatement()) {
 
-    public boolean isNovoRecorde(int pontos) {
-        List<List<String>> recordes = lerRecordes();
+            // Verifica se a tabela já existe
+            DatabaseMetaData metaData = con.getMetaData();
+            ResultSet rs = metaData.getTables(null, null, "recordes", null);
 
-        if (recordes == null || recordes.size() < MAX_RECORDS) {
-            return true;
-        }
-
-        int menorRecorde = Integer.parseInt(recordes.get(recordes.size() - 1).get(1));
-        return pontos > menorRecorde;
-    }
-
-    public List<List<String>> lerRecordes() {
-        criarArquivoSeNaoExistir();
-
-        List<List<String>> recordes = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(FILE_PATH))) {
-            String linha;
-            while ((linha = br.readLine()) != null) {
-                int lastSpaceIndex = linha.lastIndexOf(" ");
-                if (lastSpaceIndex > 0) {
-                    String nome = linha.substring(0, lastSpaceIndex);
-                    String pontosStr = linha.substring(lastSpaceIndex + 1);
-                    if (isNumero(pontosStr)) {
-                        recordes.add(List.of(nome, pontosStr));
-                    }
-                }
-        }
-
-        } catch (IOException e) {
-            return null;
-        }
-        return recordes;
-    }
-    
-    private boolean isNumero(String s) {
-        try {
-            Integer.parseInt(s);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    public void inserirRecorde(String nome, int pontos) {
-        List<List<String>> recordes = lerRecordes();
-        if (recordes == null) {
-            recordes = new ArrayList<>();
-        }
-
-        recordes.add(List.of(nome, String.valueOf(pontos)));
-        Collections.sort(recordes, (recorde1, recorde2) -> {
-            int pontos1 = Integer.valueOf(recorde1.get(1));
-            int pontos2 = Integer.valueOf(recorde2.get(1));
-            return Integer.compare(pontos2, pontos1);
-        });
-
-        while (recordes.size() > MAX_RECORDS) {
-            recordes.remove(recordes.size() - 1);
-        }
-
-        salvarRecordes(recordes);
-    }
-
-    private void salvarRecordes(List<List<String>> recordes) {
-        criarArquivoSeNaoExistir();
-
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_PATH))) {
-            for (List<String> recorde : recordes) {
-                bw.write(recorde.get(0) + " " + recorde.get(1));
-                bw.newLine();
+            if (!rs.next()) {
+                // Se a tabela não existe, cria-a
+                stmt.executeUpdate("CREATE TABLE recordes (id INTEGER PRIMARY KEY AUTOINCREMENT, nome VARCHAR(50), pontos INTEGER)");
             }
-        } catch (IOException e) {
+
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private void criarArquivoSeNaoExistir() {
-        File dataFolder = new File(DATA_FOLDER);
-        File recordesFile = new File(FILE_PATH);
+    public boolean isNovoRecorde(int pontos) {
+        try (Connection con = Conexao.obterConexao();
+             PreparedStatement stmt = con.prepareStatement("SELECT COUNT(*) FROM recordes WHERE pontos < ?")) {
 
-        if (!dataFolder.exists()) {
-            dataFolder.mkdirs();
-        }
+            stmt.setInt(1, pontos);
 
-        if (!recordesFile.exists()) {
-            try {
-                recordesFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    boolean novoRecorde = rs.getInt(1) < MAX_RECORDS;
+                    Conexao.fecharConexao();
+                    return novoRecorde;
+                }
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            Conexao.fecharConexao();
+        }
+        return false;
+    }
+
+    public List<List<String>> lerRecordes() {
+        List<List<String>> recordes = new ArrayList<>();
+
+        try (Connection con = Conexao.obterConexao();
+             PreparedStatement stmt = con.prepareStatement("SELECT nome, pontos FROM recordes ORDER BY pontos DESC LIMIT ?")) {
+
+            stmt.setInt(1, MAX_RECORDS);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String nome = rs.getString("nome");
+                    String pontosStr = rs.getString("pontos");
+                    recordes.add(List.of(nome, pontosStr));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            Conexao.fecharConexao();
+        }
+        
+        return recordes;
+    }
+
+    public void inserirRecorde(String nome, int pontos) {
+        try (Connection con = Conexao.obterConexao()) {
+            // Inserir novo recorde
+            try (PreparedStatement insertStmt = con.prepareStatement("INSERT INTO recordes (nome, pontos) VALUES (?, ?)")) {
+                insertStmt.setString(1, nome);
+                insertStmt.setInt(2, pontos);
+                insertStmt.executeUpdate();
+            }
+
+            // Excluir registros além do limite
+            try (PreparedStatement deleteStmt = con.prepareStatement(
+                    "DELETE FROM recordes WHERE id NOT IN (SELECT id FROM recordes ORDER BY pontos DESC LIMIT ?)")) {
+                deleteStmt.setInt(1, MAX_RECORDS);
+                deleteStmt.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // Sempre fechar a conexão no bloco finally
+            Conexao.fecharConexao();
         }
     }
 }
