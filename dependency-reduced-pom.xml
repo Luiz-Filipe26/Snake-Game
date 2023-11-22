@@ -25,7 +25,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>com.mycompany.snakegame.Main</mainClass>
+                  <mainClass>com.mycompany.snakegame.controle.Main</mainClass>
                 </transformer>
               </transformers>
             </configuration>
@@ -70,7 +70,7 @@
           </execution>
         </executions>
         <configuration>
-          <mainClass>com.mycompany.snakegame.Main</mainClass>
+          <mainClass>com.mycompany.snakegame.controle.Main</mainClass>
         </configuration>
       </plugin>
     </plugins>

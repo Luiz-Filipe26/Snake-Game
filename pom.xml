@@ -47,7 +47,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.mycompany.snakegame.Main</mainClass>
+                                    <mainClass>com.mycompany.snakegame.controle.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -59,7 +59,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.4</version>
                 <configuration>
-                    <mainClass>com.mycompany.snakegame.Main</mainClass>
+                    <mainClass>com.mycompany.snakegame.controle.Main</mainClass>
                 </configuration>
                 <executions>
                     <execution>
