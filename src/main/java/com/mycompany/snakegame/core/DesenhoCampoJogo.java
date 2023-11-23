@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
@@ -193,43 +192,6 @@ public class DesenhoCampoJogo {
         });
     }
     
-    /*public void deslocarImagem(Image imagem, Point2D inicio, Point2D fim, float duracao) {
-        new AnimationTimer() {
-            long duracaoNano = (long) (duracao * 1e9);
-            long tempoInicio = -1;
-            double x = inicio.getX();
-            double y = inicio.getY();
-            double xInicio = inicio.getX();
-            double yInicio = inicio.getY();
-            double xFim = fim.getX();
-            double yFim = fim.getY();
-
-            @Override
-            public void handle(long now) {
-                if (tempoInicio < 0) {
-                    tempoInicio = now;
-                }
-                //gBuffer.clearRect(x, y, imagem.getWidth(), imagem.getHeight());
-
-                double progresso = (now - tempoInicio) / duracaoNano;
-
-                if (progresso < 1.0) {
-                    x = x + progresso * (xFim - xInicio);
-                    y = y + progresso * (yFim - yInicio);
-                } else {
-                    x = fim.getX();
-                    y = fim.getY();
-                    gBuffer.drawImage(imagem, x, y);
-                    gc.drawImage(canvasBuffer.snapshot(null, null), xMargem, yMargem);
-                    stop();
-                }
-
-                gBuffer.drawImage(imagem, x, y);
-                gc.drawImage(canvasBuffer.snapshot(null, null), xMargem, yMargem);
-            }
-        }.start();
-    }*/
-    
     //É chamado cada vez que é necessário atualizar o desenho do jogo
     public synchronized void desenharJogo(Cobrinha cobrinha, boolean crescendo, Maca maca) {   
         
@@ -255,10 +217,6 @@ public class DesenhoCampoJogo {
         
         //Início - desenha a cobrinha
         desenhaImageNoPonto(getCabecaImagem(cobrinha.getCabecaDirecao()), cobrinha.getCabeca());
-        /*Point2D pontoFim = new Point2D(cobrinha.getCabeca().getX() + cobrinha.getCabecaDirecao().getX(),
-                                       cobrinha.getCabeca().getY() + cobrinha.getCabecaDirecao().getY());
-        deslocarImagem(getCabecaImagem(cobrinha.getCabecaDirecao()), cobrinha.getCabeca(), pontoFim, 0.2f);
-        */
 
         desenhaPonto(cobrinha.getPrimeiraCauda());
         desenhaImageNoPonto(getCaudaImagem(

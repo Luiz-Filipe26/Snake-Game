@@ -64,6 +64,31 @@ public class Maca {
         return posicoesMaca != null;
     }
     
+    //Checa se há espaço na área de jogo para gerar uma maçã grande
+    public boolean podeGerarMacaGrande() {
+        if(cobrinha.getTamanho() < (larguraJogo/2) * (alturaJogo - 1) - 1) {
+            return true;
+        }
+        
+        boolean[][] campoJogo = new boolean[(int) alturaJogo][(int) larguraJogo];
+        for(Point2D p : cobrinha.getCorpoCobrinha()) {
+            campoJogo[(int) (p.getY()/unidadeAltura)][(int) (p.getX()/unidadeLargura)] = true;
+        }
+        
+        for(int i=0; i<campoJogo.length-1; i++) {
+            for(int j=0; j<campoJogo[0].length-1; j++) {
+                if(campoJogo[i][j] == false && campoJogo[i][j+1] == false && campoJogo[i+1][j] == false && campoJogo[i+1][j+1] == false) {
+                    return true;
+                }
+                if(campoJogo[i][j+1] == true || campoJogo[i+1][j+1] == true) {
+                    j++;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
     // Gera uma nova posição para a maçã
     public void gerarPosicaoMaca(boolean macaGrande) {
         double x, y;

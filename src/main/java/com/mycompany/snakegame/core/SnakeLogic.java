@@ -57,8 +57,8 @@ public class SnakeLogic extends Thread implements ViewObserver {
 
     public SnakeLogic() {
         snakeController = SnakeController.getInstancia();
-        unidadeLargura = 30;
-        unidadeAltura = 30;
+        unidadeLargura = 60;
+        unidadeAltura = 60;
         xMargem = 20;
         yMargem = 20;
         alturaJogo = (snakeController.getCanvasAltura() - 2*xMargem) / unidadeAltura;
@@ -153,7 +153,12 @@ public class SnakeLogic extends Thread implements ViewObserver {
                 velocidade += taxaAumento;
                 snakeController.atualizarNumMaca(pontos);
                 
-                macaGrande = random.nextInt(5) == 0;
+                if(maca.podeGerarMacaGrande()) {
+                    macaGrande = random.nextInt(5) == 0;
+                }
+                else {
+                    macaGrande = false;
+                }
                 maca.gerarPosicaoMaca(macaGrande);
             }
 
