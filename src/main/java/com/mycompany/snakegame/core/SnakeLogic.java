@@ -100,7 +100,6 @@ public class SnakeLogic extends Thread implements ViewObserver {
     @Override
     public void run() {
         
-        
         taxaAumento = (float) (DIFERENCA_VELOCIDADE_POR_DIFICULDADE * NIVEIS_SUBIDOS_EM_UM_JOGO / areaJogo);
         int pontos;
 
@@ -145,7 +144,6 @@ public class SnakeLogic extends Thread implements ViewObserver {
                 snakeController.perdeuOJogo();
                 break;
             }
-            
 
             if (maca.comeu()) {
                 pontos += macaGrande ? 4 : 1;

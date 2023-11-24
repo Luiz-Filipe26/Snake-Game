@@ -50,7 +50,6 @@ public class SnakeFXMLController implements Initializable{
     private SnakeController snakeController;
     private int dificuldade;
     private int pontos;
-    private boolean jogoFechado;
 
     @FXML
     public void mostrarRecordes(ActionEvent event) {
@@ -80,35 +79,34 @@ public class SnakeFXMLController implements Initializable{
         snakeController.inserirRecorde(textFieldNome.getText(), pontos);
         buttonSalvarRecorde.setVisible(false);
         pontos = 0;
+        anchorPane.requestFocus();
     }
 
     @FXML
     public void novoJogoPressionado(ActionEvent event) {
-        if(jogoFechado) {
-            jogoFechado = false;
-            pontos = 0;
-            
-            labelMensagem.setText("");
-            buttonFecharJogo.setVisible(true);
-            buttonNovoJogo.setVisible(false);
-            buttonSalvarRecorde.setVisible(false);
+        pontos = 0;
 
-            snakeController.novoJogoCampo();
+        labelMensagem.setText("");
+        buttonFecharJogo.setVisible(true);
+        buttonNovoJogo.setVisible(false);
+        buttonSalvarRecorde.setVisible(false);
+        
+        anchorPane.requestFocus();
+        
+        snakeController.novoJogoCampo();
 
-            snakeController.novoJogo(dificuldade, checkBoxAtravessarBordas.isSelected());
-        }
+        snakeController.novoJogo(dificuldade, checkBoxAtravessarBordas.isSelected());
     }
     
     @FXML
     public void fecharJogoPressionado(ActionEvent event) {
-        jogoFechado = true;
         snakeController.fecharJogo();
         buttonFecharJogo.setVisible(false);
         buttonNovoJogo.setVisible(true);
     }
     
     @FXML
-    public void sliderDificuldadeMouseSaiu(MouseEvent event) {
+    public void focarCanvas(MouseEvent event) {
         anchorPane.requestFocus();
     }
     
@@ -123,13 +121,12 @@ public class SnakeFXMLController implements Initializable{
     public void notificaNovoRecorde(int pontos) {
         this.pontos = pontos;
         Platform.runLater(() -> {
-            labelMensagem.setText("Novo recorde de " + pontos + " pontos!");
+            labelMensagem.setText(labelMensagem.getText() + " Novo recorde de " + pontos + " pontos!");
             buttonSalvarRecorde.setVisible(true);
         });
     }
     
     public void perdeuOJogo() {
-        jogoFechado = true;
         snakeController.fecharJogo();
         Platform.runLater(() -> {
             buttonFecharJogo.setVisible(false);
@@ -159,7 +156,6 @@ public class SnakeFXMLController implements Initializable{
         anchorPane.requestFocus();
         buttonFecharJogo.setVisible(false);
         buttonSalvarRecorde.setVisible(false);
-        jogoFechado = true;
         dificuldade = 5;
         
         
