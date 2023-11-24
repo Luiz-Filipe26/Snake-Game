@@ -57,8 +57,8 @@ public class SnakeLogic extends Thread implements ViewObserver {
 
     public SnakeLogic() {
         snakeController = SnakeController.getInstancia();
-        unidadeLargura = 60;
-        unidadeAltura = 60;
+        unidadeLargura = 30;
+        unidadeAltura = 30;
         xMargem = 20;
         yMargem = 20;
         alturaJogo = (snakeController.getCanvasAltura() - 2*xMargem) / unidadeAltura;
@@ -112,11 +112,10 @@ public class SnakeLogic extends Thread implements ViewObserver {
             
             pontos = gameLoop();
             
+            snakeController.notificaNovoRecordeSeFor(pontos);
             if (cobrinha.getTamanho() == areaJogo) {
                 snakeController.venceuOJogo();
             }
-            
-            snakeController.notificaNovoRecordeSeFor(pontos);
         }
     }
     

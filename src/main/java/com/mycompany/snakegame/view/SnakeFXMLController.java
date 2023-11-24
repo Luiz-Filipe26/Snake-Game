@@ -121,7 +121,7 @@ public class SnakeFXMLController implements Initializable{
     public void notificaNovoRecorde(int pontos) {
         this.pontos = pontos;
         Platform.runLater(() -> {
-            labelMensagem.setText(labelMensagem.getText() + " Novo recorde de " + pontos + " pontos!");
+    		labelMensagem.setText("Novo recorde de " + pontos + " pontos!");
             buttonSalvarRecorde.setVisible(true);
         });
     }
@@ -137,7 +137,12 @@ public class SnakeFXMLController implements Initializable{
     public void venceuOJogo() {
         snakeController.fecharJogo();
         Platform.runLater(() -> {
-            labelMensagem.setText("Você venceu!");
+        	if(labelMensagem.getText().contains("recorde")) {
+        		labelMensagem.setText(labelMensagem.getText() + " Você venceu!");        		
+        	}
+        	else {
+                labelMensagem.setText("Você venceu!");
+        	}
             buttonFecharJogo.setVisible(false);
             buttonNovoJogo.setVisible(true);
         });
