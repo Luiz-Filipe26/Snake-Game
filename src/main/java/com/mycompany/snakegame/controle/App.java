@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.mycompany.snakegame.core.ChecadorColisao;
 import com.mycompany.snakegame.core.DesenhoCampoJogo;
 import com.mycompany.snakegame.core.GerenciadorJogo;
 import com.mycompany.snakegame.view.SnakeFXMLController;
@@ -39,7 +40,8 @@ public class App extends Application {
         stage.setScene(scene);
         stage.setTitle("Snake Game");
         
-        inicializarController(root, fxmlLoader.getController());        
+        inicializarController(root, fxmlLoader.getController());
+        ChecadorColisao.inicializarValores();
         criarListeners(scene, stage);
         
         stage.show();

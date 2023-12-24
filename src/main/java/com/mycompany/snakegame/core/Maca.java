@@ -27,12 +27,12 @@ public class Maca {
     
     // Limpa a maçã após ser comida
     public List<Point2D> limparMacaComida() {
+    	List<Point2D> pmc = null;
         if(posicoesMacaComida != null) {
-            List<Point2D> pmc = posicoesMacaComida;
+            pmc = posicoesMacaComida;
             posicoesMacaComida = null;
-            return pmc;
         }
-        return null;
+        return pmc;
     }
     
     // Obtém a posição atual da maçã
@@ -49,7 +49,7 @@ public class Maca {
         if(posicoesMacaComida != null) {
             return true;
         }
-        if(posicoesMaca.contains(cobrinha.getCabeca())) {
+        if(ChecadorColisao.checar(posicoesMaca, cobrinha.getCabeca())) {
             posicoesMacaComida = posicoesMaca;
             return true;
         }
@@ -119,18 +119,13 @@ public class Maca {
             			posMaca.add(0, unidadeAltura),
             			posMaca.add(unidadeLargura, unidadeAltura)));
             }
-        } while (!isPosicaoMacaValida(posicoesMacaAux));
+        } while (isPosicaoMacaInvalida(posicoesMacaAux));
 
         posicoesMaca = posicoesMacaAux;
     }
     
     // Verifica se a posição gerada para a maçã é válida
-    private boolean isPosicaoMacaValida(List<Point2D> posicoesMacaAux) {
-        for (Point2D pmx : posicoesMacaAux) {
-            if (cobrinha.checaColisaoPonto(pmx)) {
-                return false;
-            }
-        }
-        return true;
+    private boolean isPosicaoMacaInvalida(List<Point2D> posicoesMacaAux) {
+        return ChecadorColisao.checar(cobrinha.getCorpoCobrinha(), posicoesMacaAux);
     }
 }

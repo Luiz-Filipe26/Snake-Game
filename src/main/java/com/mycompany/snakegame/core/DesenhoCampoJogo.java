@@ -31,12 +31,12 @@ public class DesenhoCampoJogo {
     public final Point2D BAIXO;
     
     // Variáveis relacionadas às dimensões do jogo
-    private double unidadeLargura;
-    private double unidadeAltura;
-    private double larguraJogo;
-    private double alturaJogo;
-    private double xMargem;
-    private double yMargem;
+    private final double unidadeLargura;
+    private final double unidadeAltura;
+    private final double larguraJogo;
+    private final double alturaJogo;
+    private final double xMargem;
+    private final double yMargem;
     
     //Objetos para desenho
     private GraphicsContext gc;

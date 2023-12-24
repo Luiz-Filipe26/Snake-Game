@@ -39,8 +39,8 @@ public class Cobrinha {
         
         unidadeLargura = applicationController.getUnidadeLargura();
         unidadeAltura = applicationController.getUnidadeAltura();
-        larguraJogo = (applicationController.getCanvasLargura() - 2 * applicationController.getXMargem()) / unidadeLargura;
-        alturaJogo = (applicationController.getCanvasAltura() - 2 * applicationController.getYMargem() ) / unidadeAltura;
+        larguraJogo = (applicationController.getCanvasLargura() - 2 * applicationController.getXMargem());
+        alturaJogo = (applicationController.getCanvasAltura() - 2 * applicationController.getYMargem());
         
         DIREITA = new Point2D(unidadeLargura, 0);
         ESQUERDA = new Point2D(-unidadeLargura, 0);
@@ -52,7 +52,7 @@ public class Cobrinha {
     
     // Inicializa a cobrinha com três partes no meio do campo
     private void criarCobrinhaInicial() {
-        Point2D cabeca = new Point2D(unidadeLargura * larguraJogo / 2, unidadeAltura * alturaJogo / 2);
+        Point2D cabeca = new Point2D(larguraJogo / 2, alturaJogo / 2);
         Point2D cauda1 = cabeca.subtract(unidadeLargura, 0);
         Point2D cauda2 = cauda1.subtract(unidadeLargura, 0);
 
@@ -66,15 +66,11 @@ public class Cobrinha {
         this.podeAtravessarBordas = podeAtravessarBordas;
     }
     
-    public boolean checaColisaoPonto(Point2D ponto) {
-        return corpoCobrinha.contains(ponto);
-    }
-    
     // Faz a cobrinha crescer, adicionando a parte removida durante o movimento
     public boolean moverCobrinha(Point2D direcao) {
         Point2D novaCabeca = getCabeca().add(direcao.getX(), direcao.getY());
         
-        if (corpoCobrinha.contains(novaCabeca)) {
+        if (ChecadorColisao.checar(corpoCobrinha, novaCabeca)) {
             return false;
         } else if (atravessouBorda(novaCabeca)) {
             if (!podeAtravessarBordas) {
@@ -101,12 +97,12 @@ public class Cobrinha {
     }
     
     private boolean atravessouBorda(Point2D p) {
-        return p.getX() < 0 || p.getX() > unidadeLargura * (larguraJogo - 1) || p.getY() < 0 || p.getY() > unidadeAltura * (alturaJogo - 1);
+        return ChecadorColisao.checarMargem(p);
     }
     
     private Point2D novoPontoAlemDaBorda(Point2D p) {
-        double x = (p.getX() + unidadeLargura * larguraJogo) % (unidadeLargura * larguraJogo);
-        double y = (p.getY() + unidadeAltura * alturaJogo) % (unidadeAltura * alturaJogo);
+        double x = (p.getX() + larguraJogo) % larguraJogo;
+        double y = (p.getY() + alturaJogo) % alturaJogo;
         return new Point2D(x, y);
     }
     
