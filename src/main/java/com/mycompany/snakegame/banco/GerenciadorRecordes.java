@@ -107,7 +107,6 @@ public class GerenciadorRecordes {
         } catch (SQLException e) {
             Logger.getLogger(GerenciadorRecordes.class.getName()).log(Level.SEVERE, null, e);
         } finally {
-            // Sempre fechar a conexão no bloco finally
             Conexao.fecharConexao();
         }
     }

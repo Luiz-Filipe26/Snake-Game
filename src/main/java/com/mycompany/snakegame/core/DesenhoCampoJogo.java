@@ -1,27 +1,25 @@
 
 package com.mycompany.snakegame.core;
 
-import com.mycompany.snakegame.util.Ponto;
-import com.mycompany.snakegame.controle.SnakeController;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import com.mycompany.snakegame.controle.ApplicationController;
+
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 
 
 public class DesenhoCampoJogo {
     private static DesenhoCampoJogo desenhoCampoJogo;
-    private final SnakeController snakeController;
+    private final ApplicationController applicationController;
     
     // Direções possíveis da cobrinha
     public final Point2D DIREITA;
@@ -45,10 +43,10 @@ public class DesenhoCampoJogo {
     //Imagem completa de sprites da cobrinha
     private final Image imagemCompleta;
     
-    private Map<List<Point2D>, Ponto> mapaCauda ;
-    private Map<Point2D, Ponto> mapaCaudaPonta;
-    private Map<Point2D, Ponto> mapaCabeca;
-    private Map<Ponto, Image> mapaImagens;
+    private Map<String, String> mapaCauda;
+    private Map<Point2D, String> mapaCaudaPonta;
+    private Map<Point2D, String> mapaCabeca;
+    private Map<String, Image> mapaImagens;
     
     // Método para obter a instância única da classe
     public static synchronized DesenhoCampoJogo getInstancia() {
@@ -65,14 +63,14 @@ public class DesenhoCampoJogo {
     // Construtor privado para garantir apenas uma instância
     private DesenhoCampoJogo(GraphicsContext graphicsContext) {
         gc = graphicsContext;
-        snakeController = SnakeController.getInstancia();
+        applicationController = ApplicationController.getInstancia();
         
-        unidadeLargura = snakeController.getUnidadeLargura();
-        unidadeAltura = snakeController.getUnidadeAltura();
-        xMargem = snakeController.getXMargem();
-        yMargem = snakeController.getYMargem();
-        larguraJogo = snakeController.getCanvasLargura() - 2 * xMargem;
-        alturaJogo = snakeController.getCanvasAltura() - 2 * yMargem;
+        unidadeLargura = applicationController.getUnidadeLargura();
+        unidadeAltura = applicationController.getUnidadeAltura();
+        xMargem = applicationController.getXMargem();
+        yMargem = applicationController.getYMargem();
+        larguraJogo = applicationController.getCanvasLargura() - 2 * xMargem;
+        alturaJogo = applicationController.getCanvasAltura() - 2 * yMargem;
         
         DIREITA = new Point2D(unidadeLargura, 0);
         ESQUERDA = new Point2D(-unidadeLargura, 0);
@@ -86,47 +84,48 @@ public class DesenhoCampoJogo {
     }
     
     // Método para inicializar os mapas que mapeiam relações de direção e partes da cobrinha
-    public void inicializarMaps() {
-        mapaCauda = new HashMap<>();
-        Object[][] equivalenciasCauda = {
-                {DIREITA, DIREITA, new Ponto(1, 0)},
-                {CIMA, CIMA, new Ponto(2, 1)},
-                {ESQUERDA, CIMA, new Ponto(0, 1)},
-                {CIMA, DIREITA, new Ponto(0, 0)},
-                {DIREITA, BAIXO, new Ponto(2, 0)},
-                {BAIXO, ESQUERDA, new Ponto(2, 2)}
-        };
-
-        for (Object[] equivalencia : equivalenciasCauda) {
-            List<Point2D> linhaPonto = new ArrayList<>();
-            linhaPonto.add((Point2D) equivalencia[0]);
-            linhaPonto.add((Point2D) equivalencia[1]);
-            mapaCauda.put(linhaPonto, (Ponto) equivalencia[2]);
-        }
+    private void inicializarMaps() {
+    	String direita = DIREITA.toString();
+    	String esquerda = ESQUERDA.toString();
+    	String cima = CIMA.toString();
+    	String baixo = BAIXO.toString();
+    	
+        mapaCauda = new HashMap<>(Map.of(
+        		direita + direita, criarPonto(1, 0),
+        		cima + cima, criarPonto(2, 1),
+        		esquerda + cima, criarPonto(0, 1),
+        		cima + direita, criarPonto(0, 0),
+        		direita + baixo, criarPonto(2, 0),
+        		baixo + esquerda, criarPonto(2, 2)
+        		));
         
-        mapaCaudaPonta = new HashMap<>();
-        mapaCaudaPonta.put(CIMA, new Ponto(3, 2));
-        mapaCaudaPonta.put(DIREITA, new Ponto(4, 2));
-        mapaCaudaPonta.put(ESQUERDA, new Ponto(3, 3));
-        mapaCaudaPonta.put(BAIXO, new Ponto(4, 3));
+        mapaCaudaPonta = new HashMap<>(Map.of(
+        		CIMA, criarPonto(3, 2),
+        		DIREITA, criarPonto(4, 2),
+        		ESQUERDA, criarPonto(3, 3),
+        		BAIXO, criarPonto(4, 3)
+        		));
 
-        mapaCabeca = new HashMap<>();
-        mapaCabeca.put(CIMA, new Ponto(3, 0));
-        mapaCabeca.put(DIREITA, new Ponto(4, 0));
-        mapaCabeca.put(ESQUERDA, new Ponto(3, 1));
-        mapaCabeca.put(BAIXO, new Ponto(4, 1));
+        mapaCabeca = new HashMap<>(Map.of(
+        		CIMA, criarPonto(3, 0),
+        		DIREITA, criarPonto(4, 0),
+    			ESQUERDA, criarPonto(3, 1),
+    			BAIXO, criarPonto(4, 1)
+        ));
 
         mapaImagens = new HashMap<>();
         // Itera sobre a imagem original para criar imagens seções de imagens redimensionadas e as armazena no mapa
         for (int x = 0; x < imagemCompleta.getWidth(); x += 64) {
             for (int y = 0; y < imagemCompleta.getHeight(); y += 64) {
-                Ponto coordenadas = new Ponto(x/64, y/64);
-                if(coordenadas.x==1 && coordenadas.y==2) {
+            	int posImagemX = x/64;
+            	int posImagemY = y/64;
+            	String coordenadas = criarPonto(posImagemX, posImagemY);
+                if(posImagemX==1 && posImagemY==2) {
                     Image subImagem = cortarImagem(imagemCompleta, x, y, 64, 64);
                     Image imagemRedimensionada = redimensionarImagem(subImagem, xMargem, yMargem);
                     mapaImagens.put(coordenadas, imagemRedimensionada);
                 }
-                else if(coordenadas.x==0 && coordenadas.y==2) {
+                else if(posImagemX==0 && posImagemY==2) {
                     Image subImagem = cortarImagem(imagemCompleta, x, y+64, 64, 64);
                     Image imagemRedimensionada = redimensionarImagem(subImagem, unidadeLargura*2, unidadeAltura*2);
                     mapaImagens.put(coordenadas, imagemRedimensionada);
@@ -138,6 +137,10 @@ public class DesenhoCampoJogo {
                 }
             }
         }
+    }
+    
+    private String criarPonto(int x, int y) {
+    	return "(" + x + ", " + y + ")";
     }
     
     private Image cortarImagem(Image imagemOriginal, int x, int y, int dx, int dy) {
@@ -166,7 +169,7 @@ public class DesenhoCampoJogo {
         gBuffer = canvasBuffer.getGraphicsContext2D();
         
         //Dois loops para desenhar a margem do jogo
-        Image imagemFundo = mapaImagens.get(new Ponto(1, 2));
+        Image imagemFundo = mapaImagens.get(criarPonto(1, 2));
         for(int x=0; x<largura; x+=xMargem) {
             gc.drawImage(imagemFundo, x, 0);
             gc.drawImage(imagemFundo, x, altura-yMargem);
@@ -208,10 +211,10 @@ public class DesenhoCampoJogo {
         
         if(maca.temMaca()) {
             if(!maca.isMacaGrande()) {
-                desenhaImageNoPonto(mapaImagens.get(new Ponto(0, 3)), maca.getPosicaoMaca());
+                desenhaImageNoPonto(mapaImagens.get(criarPonto(0, 3)), maca.getPosicaoMaca());
             }
             else {
-                desenhaImageNoPonto(mapaImagens.get(new Ponto(0, 2)), maca.getPosicaoMaca());
+                desenhaImageNoPonto(mapaImagens.get(criarPonto(0, 2)), maca.getPosicaoMaca());
             }
         }
         
@@ -219,15 +222,17 @@ public class DesenhoCampoJogo {
         desenhaImageNoPonto(getCabecaImagem(cobrinha.getCabecaDirecao()), cobrinha.getCabeca());
 
         desenhaPonto(cobrinha.getPrimeiraCauda());
-        desenhaImageNoPonto(getCaudaImagem(
-                new ArrayList(){{
-                    add(cobrinha.getPrimeiraCaudaDirecao());
-                    add(cobrinha.getCabecaDirecao());
-                }}), cobrinha.getPrimeiraCauda());
+        
+        Point2D direcao1 = cobrinha.getPrimeiraCaudaDirecao();
+        Point2D direcao2 = cobrinha.getCabecaDirecao();
+        desenhaImageNoPonto(getCaudaImagem(direcao1, direcao2), cobrinha.getPrimeiraCauda());
         
         desenhaPonto(cobrinha.getCaudaPonta());
         desenhaImageNoPonto(getCaudaPontaImagem(cobrinha.getPenultimaCaudaDirecao()), cobrinha.getCaudaPonta());
         //Fim - desenha a cobrinha
+        
+        //desenhaImageNoPonto(mapaImagens.get(criarPonto(1, 4)), new Point2D(90, 150));
+        //desenhaImageNoPonto(mapaImagens.get(criarPonto(1, 4)), new Point2D(360, 90));
         
         //Atualiza a tela com o desenho do buffer
         Platform.runLater(() -> {
@@ -245,24 +250,25 @@ public class DesenhoCampoJogo {
     }
     
     private Image getCabecaImagem(Point2D direcao) {        
-        Ponto lugarImagem = mapaCabeca.get(direcao);
+        String lugarImagem = mapaCabeca.get(direcao);
         return mapaImagens.get(lugarImagem);
     }
     
-    private Image getCaudaImagem(List<Point2D> direcoes) {
-        Ponto lugarImagem = mapaCauda.get(direcoes);
-        if(lugarImagem == null) {
-            lugarImagem = mapaCauda.get(new ArrayList() {{
-                add(new Point2D(-direcoes.get(1).getX(), -direcoes.get(1).getY()));
-                add(new Point2D(-direcoes.get(0).getX(), -direcoes.get(0).getY()));
-            }});
-        }
+    private Image getCaudaImagem(Point2D direcao1, Point2D direcao2) {
+        String lugarImagem = mapaCauda.get(direcao1.toString() + direcao2.toString());
         
+        boolean precisaInverter = (lugarImagem == null);
+        if (precisaInverter) {
+        	direcao1 = new Point2D(0, 0).subtract(direcao1);
+        	direcao2 = new Point2D(0, 0).subtract(direcao2);
+            lugarImagem = mapaCauda.get(direcao2.toString() + direcao1.toString());
+        }
+
         return mapaImagens.get(lugarImagem);
     }
     
     private Image getCaudaPontaImagem(Point2D direcao) {
-        Ponto lugarImagem = mapaCaudaPonta.get(direcao);
+        String lugarImagem = mapaCaudaPonta.get(direcao);
         return mapaImagens.get(lugarImagem);
     }
 }

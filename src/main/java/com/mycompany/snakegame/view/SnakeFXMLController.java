@@ -1,6 +1,6 @@
 package com.mycompany.snakegame.view;
 
-import com.mycompany.snakegame.controle.SnakeController;
+import com.mycompany.snakegame.controle.ApplicationController;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -47,10 +47,27 @@ public class SnakeFXMLController implements Initializable{
     @FXML
     private TextField textFieldNome;
     
-    private SnakeController snakeController;
+    private ApplicationController applicationController;
     private int dificuldade;
     private int pontos;
 
+
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        
+        applicationController = ApplicationController.getInstancia();
+        anchorPane.requestFocus();
+        buttonFecharJogo.setVisible(false);
+        buttonSalvarRecorde.setVisible(false);
+        dificuldade = 5;
+        
+        
+        sliderDificuldade.valueProperty().addListener((ob, ov, novoValor) -> {
+            dificuldade = novoValor.intValue();
+            labelDificuldade.setText("Dificuldade: " + dificuldade);
+        });
+    }
+    
     @FXML
     public void mostrarRecordes(ActionEvent event) {
         try {
@@ -76,7 +93,7 @@ public class SnakeFXMLController implements Initializable{
 
     @FXML
     public void salvarRecorde(ActionEvent event) {
-        snakeController.inserirRecorde(textFieldNome.getText(), pontos);
+        applicationController.inserirRecorde(textFieldNome.getText(), pontos);
         buttonSalvarRecorde.setVisible(false);
         pontos = 0;
         anchorPane.requestFocus();
@@ -93,14 +110,14 @@ public class SnakeFXMLController implements Initializable{
         
         anchorPane.requestFocus();
         
-        snakeController.novoJogoCampo();
+        applicationController.novoJogoCampo();
 
-        snakeController.novoJogo(dificuldade, checkBoxAtravessarBordas.isSelected());
+        applicationController.novoJogo(dificuldade, checkBoxAtravessarBordas.isSelected());
     }
     
     @FXML
     public void fecharJogoPressionado(ActionEvent event) {
-        snakeController.fecharJogo();
+        applicationController.fecharJogo();
         buttonFecharJogo.setVisible(false);
         buttonNovoJogo.setVisible(true);
     }
@@ -127,15 +144,16 @@ public class SnakeFXMLController implements Initializable{
     }
     
     public void perdeuOJogo() {
-        snakeController.fecharJogo();
+        applicationController.fecharJogo();
         Platform.runLater(() -> {
             buttonFecharJogo.setVisible(false);
             buttonNovoJogo.setVisible(true);
             labelMensagem.setText("Você perdeu! " + labelMensagem.getText());
         });
     }
+    
     public void venceuOJogo() {
-        snakeController.fecharJogo();
+        applicationController.fecharJogo();
         Platform.runLater(() -> {
         	if(labelMensagem.getText().contains("recorde")) {
         		labelMensagem.setText(labelMensagem.getText() + " Você venceu!");        		
@@ -148,25 +166,9 @@ public class SnakeFXMLController implements Initializable{
         });
     }
     
-    public void atualizarNumMaca(int comidas) {
+    public void atualizarStatus(int macasComidas, int pontos) {
         Platform.runLater(() -> {
-            labelMensagem.setText("Maçãs comidas: " + comidas);
-        });
-    }
-
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        
-        snakeController = SnakeController.getInstancia();
-        anchorPane.requestFocus();
-        buttonFecharJogo.setVisible(false);
-        buttonSalvarRecorde.setVisible(false);
-        dificuldade = 5;
-        
-        
-        sliderDificuldade.valueProperty().addListener((observable, oldValue, newValue) -> {
-            dificuldade = newValue.intValue();
-            labelDificuldade.setText("Dificuldade: " + dificuldade);
+            labelMensagem.setText("Maçãs comidas: " + macasComidas + " Pontos: " + pontos);
         });
     }
 

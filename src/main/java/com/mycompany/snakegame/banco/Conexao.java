@@ -23,7 +23,7 @@ public class Conexao {
             }
             return con;
         } catch (SQLException ex) {
-            System.out.println("Erro na conexão");
+            System.err.println("Erro na conexão");
             Logger.getLogger(Conexao.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
@@ -35,7 +35,7 @@ public class Conexao {
                 con.close();
             }
         } catch (SQLException ex) {
-            System.out.println("Erro ao fechar a conexão");
+            System.err.println("Erro ao fechar a conexão");
             Logger.getLogger(Conexao.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

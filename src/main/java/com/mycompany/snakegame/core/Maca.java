@@ -60,13 +60,17 @@ public class Maca {
         return posicoesMaca.size() == 4;
     }
     
+    public int getTamanho() {
+        return posicoesMaca.size();
+    }
+    
     public boolean temMaca() {
         return posicoesMaca != null;
     }
     
     //Checa se há espaço na área de jogo para gerar uma maçã grande
     public boolean podeGerarMacaGrande() {
-        //Teste se a cobrinha é pequena o suficiente para certamente poder
+        //Testa se a cobrinha é pequena o suficiente para certamente poder
         if(cobrinha.getTamanho() < (larguraJogo/2) * (alturaJogo - 1) - 1) {
             return true;
         }
@@ -108,12 +112,12 @@ public class Maca {
             posMaca = new Point2D(x, y);
             
             // Cria a lista de posições da maçã
-            posicoesMacaAux = new ArrayList();
-            posicoesMacaAux.add(posMaca);
+            posicoesMacaAux = new ArrayList<>(List.of(posMaca));
             if (macaGrande) {
-                posicoesMacaAux.add(new Point2D(posMaca.getX() + unidadeLargura, posMaca.getY()));
-                posicoesMacaAux.add(new Point2D(posMaca.getX(), posMaca.getY() + unidadeAltura));
-                posicoesMacaAux.add(new Point2D(posMaca.getX() + unidadeLargura, posMaca.getY() + unidadeAltura));
+            	posicoesMacaAux.addAll(List.of(
+            			posMaca.add(unidadeLargura, 0),
+            			posMaca.add(0, unidadeAltura),
+            			posMaca.add(unidadeLargura, unidadeAltura)));
             }
         } while (!isPosicaoMacaValida(posicoesMacaAux));
 

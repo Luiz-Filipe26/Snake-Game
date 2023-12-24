@@ -1,36 +1,32 @@
 
 package com.mycompany.snakegame.controle;
 
-import com.mycompany.snakegame.core.Cobrinha;
-import com.mycompany.snakegame.core.DesenhoCampoJogo;
-import com.mycompany.snakegame.banco.GerenciadorRecordes;
-import com.mycompany.snakegame.core.Maca;
-import com.mycompany.snakegame.core.SnakeLogic;
-import com.mycompany.snakegame.util.ViewObserver;
-import com.mycompany.snakegame.view.SnakeFXMLController;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SnakeController {
+import com.mycompany.snakegame.banco.GerenciadorRecordes;
+import com.mycompany.snakegame.core.Cobrinha;
+import com.mycompany.snakegame.core.DesenhoCampoJogo;
+import com.mycompany.snakegame.core.Maca;
+import com.mycompany.snakegame.core.GerenciadorJogo;
+import com.mycompany.snakegame.view.SnakeFXMLController;
+
+public class ApplicationController {
     
-    private static SnakeController snakeController;
+    private static ApplicationController applicationController;
     private SnakeFXMLController snakeFxmlController;
+    private GerenciadorJogo gerenciadorJogo;
     private DesenhoCampoJogo desenhoCampoJogo;
-    private SnakeLogic snakeLogic;
-    
-    private final List<ViewObserver> observers;
     
     
-    public static SnakeController getInstancia() {
-        if(snakeController == null) {
-            snakeController = new SnakeController();
+    public static ApplicationController getInstancia() {
+        if(applicationController == null) {
+            applicationController = new ApplicationController();
         }
-        return snakeController;
+        return applicationController;
     }
     
-    private SnakeController() {
-        observers = new ArrayList<>();
-    }
+    private ApplicationController() {}
     
     public void adicionarSnakeFXMLController(SnakeFXMLController snakeFxmlController) {
         this.snakeFxmlController = snakeFxmlController;
@@ -40,18 +36,8 @@ public class SnakeController {
         this.desenhoCampoJogo = desenhoCampoJogo;
     }
     
-    public void adicionarObserver(ViewObserver observer) {
-        observers.add(observer);
-        if(observer instanceof SnakeLogic) {
-            snakeLogic = (SnakeLogic) observer;
-        }
-    }
-
-    public void removerObserver(ViewObserver observer) {
-        observers.remove(observer);
-        if(observer instanceof SnakeLogic) {
-            snakeLogic = null;
-        }
+    public void setSnakeLogic(GerenciadorJogo gerenciadorJogo) {
+        this.gerenciadorJogo = gerenciadorJogo;
     }
     
     public double getCanvasLargura() {
@@ -63,49 +49,39 @@ public class SnakeController {
     }
     
     public double getUnidadeLargura() {
-        return snakeLogic.getUnidadeLargura();
+        return gerenciadorJogo.getUnidadeLargura();
     }
     
     public double getUnidadeAltura() {
-        return snakeLogic.getUnidadeAltura();
+        return gerenciadorJogo.getUnidadeAltura();
     }
     
     public double getXMargem() {
-        return snakeLogic.getXMargem();
+        return gerenciadorJogo.getXMargem();
     }
     
     public double getYMargem() {
-        return snakeLogic.getYMargem();
+        return gerenciadorJogo.getYMargem();
     }
     
     public void keyPressed(String keyCode) {
-        for(ViewObserver o: observers) {
-            o.keyPressed(keyCode);
-        }
+        gerenciadorJogo.keyPressed(keyCode);
     }
     
     public void keyReleased(String keyCode) {
-        for(ViewObserver o: observers) {
-            o.keyReleased(keyCode);
-        }
+    	gerenciadorJogo.keyReleased(keyCode);
     }
 
     public void novoJogo(int dificuldade, boolean atravessarBordas) {
-        for(ViewObserver o: observers) {
-            o.novoJogo(dificuldade, atravessarBordas);
-        }
+    	gerenciadorJogo.novoJogo(dificuldade, atravessarBordas);
     }
 
     public void fecharJogo() {
-        for(ViewObserver o: observers) {
-            o.fecharJogo();
-        }
+    	gerenciadorJogo.fecharJogo();
     }
 
     public void viewFechada() {
-        for(ViewObserver o: observers) {
-            o.viewFechada();
-        }
+    	gerenciadorJogo.viewFechada();
     }
 
     public void novoJogoCampo() {
@@ -120,8 +96,8 @@ public class SnakeController {
         snakeFxmlController.venceuOJogo();
     }
 
-    public void atualizarNumMaca(int comidas) {
-        snakeFxmlController.atualizarNumMaca(comidas);
+    public void atualizarStatus(int macasComidas, int pontos) {
+        snakeFxmlController.atualizarStatus(macasComidas, pontos);
     }
 
     public void perdeuOJogo() {

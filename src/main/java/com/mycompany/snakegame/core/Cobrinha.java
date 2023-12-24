@@ -1,11 +1,13 @@
 
 package com.mycompany.snakegame.core;
 
-import com.mycompany.snakegame.controle.SnakeController;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.mycompany.snakegame.controle.ApplicationController;
+
 import javafx.geometry.Point2D;
 
 public class Cobrinha {
@@ -28,18 +30,17 @@ public class Cobrinha {
     // Armazena a direção do ponto removido
     private Point2D direcaoPontoRemovido;
     
-    // Indica se a cobrinha pode atravessar as bordas do jogo
-    private boolean atravessarBordas;
+    private boolean podeAtravessarBordas;
     
     public Cobrinha() {
-        direcoesCobrinha = new HashMap();
+        direcoesCobrinha = new HashMap<>();
         
-        SnakeController snakeController = SnakeController.getInstancia();
+        ApplicationController applicationController = ApplicationController.getInstancia();
         
-        unidadeLargura = snakeController.getUnidadeLargura();
-        unidadeAltura = snakeController.getUnidadeAltura();
-        larguraJogo = (snakeController.getCanvasLargura() - 2 * snakeController.getXMargem()) / unidadeLargura;
-        alturaJogo = (snakeController.getCanvasAltura() - 2 * snakeController.getYMargem() ) / unidadeAltura;
+        unidadeLargura = applicationController.getUnidadeLargura();
+        unidadeAltura = applicationController.getUnidadeAltura();
+        larguraJogo = (applicationController.getCanvasLargura() - 2 * applicationController.getXMargem()) / unidadeLargura;
+        alturaJogo = (applicationController.getCanvasAltura() - 2 * applicationController.getYMargem() ) / unidadeAltura;
         
         DIREITA = new Point2D(unidadeLargura, 0);
         ESQUERDA = new Point2D(-unidadeLargura, 0);
@@ -51,20 +52,18 @@ public class Cobrinha {
     
     // Inicializa a cobrinha com três partes no meio do campo
     private void criarCobrinhaInicial() {
-        corpoCobrinha = new ArrayList();
-        corpoCobrinha.add(new Point2D(unidadeLargura * larguraJogo / 2, unidadeAltura * alturaJogo / 2));
-        corpoCobrinha.add(new Point2D(corpoCobrinha.get(0).getX() - unidadeLargura, corpoCobrinha.get(0).getY()));
-        corpoCobrinha.add(new Point2D(corpoCobrinha.get(1).getX() - unidadeLargura, corpoCobrinha.get(0).getY()));
-        
-        direcoesCobrinha = new HashMap();
-        direcoesCobrinha.put(corpoCobrinha.get(0), DIREITA);
-        direcoesCobrinha.put(corpoCobrinha.get(1), DIREITA);
-        direcoesCobrinha.put(corpoCobrinha.get(2), DIREITA);
+        Point2D cabeca = new Point2D(unidadeLargura * larguraJogo / 2, unidadeAltura * alturaJogo / 2);
+        Point2D cauda1 = cabeca.subtract(unidadeLargura, 0);
+        Point2D cauda2 = cauda1.subtract(unidadeLargura, 0);
+
+        corpoCobrinha = new ArrayList<>(List.of(cabeca, cauda1, cauda2));
+
+        direcoesCobrinha = new HashMap<>();
+        corpoCobrinha.forEach(parteCorpo -> direcoesCobrinha.put(parteCorpo, DIREITA));
     }
     
-    // Define se a cobrinha pode atravessar as bordas do campo
-    public void setAtravessarBordas(boolean atravessarBordas) {
-        this.atravessarBordas = atravessarBordas;
+    public void setPodeAtravessarBordas(boolean podeAtravessarBordas) {
+        this.podeAtravessarBordas = podeAtravessarBordas;
     }
     
     public boolean checaColisaoPonto(Point2D ponto) {
@@ -73,21 +72,22 @@ public class Cobrinha {
     
     // Faz a cobrinha crescer, adicionando a parte removida durante o movimento
     public boolean moverCobrinha(Point2D direcao) {
-        Point2D novaCabeca = new Point2D(corpoCobrinha.get(0).getX() + direcao.getX(), corpoCobrinha.get(0).getY() + direcao.getY());
+        Point2D novaCabeca = getCabeca().add(direcao.getX(), direcao.getY());
+        
         if (corpoCobrinha.contains(novaCabeca)) {
             return false;
         } else if (atravessouBorda(novaCabeca)) {
-            if (!atravessarBordas) {
+            if (!podeAtravessarBordas) {
                 return false;
             }
-            novaCabeca = novaDirecaoAlemDaBorda(novaCabeca);
+            novaCabeca = novoPontoAlemDaBorda(novaCabeca);
         }
         corpoCobrinha.add(0, novaCabeca);
         direcoesCobrinha.put(novaCabeca, direcao);
         
         pontoRemovido = corpoCobrinha.remove(corpoCobrinha.size()-1);
         direcaoPontoRemovido = direcoesCobrinha.remove(pontoRemovido);
-        
+                
         return true;
     }
     
@@ -104,16 +104,14 @@ public class Cobrinha {
         return p.getX() < 0 || p.getX() > unidadeLargura * (larguraJogo - 1) || p.getY() < 0 || p.getY() > unidadeAltura * (alturaJogo - 1);
     }
     
-    // Calcula a nova posição da cobrinha quando ela atravessa as bordas do campo
-    private Point2D novaDirecaoAlemDaBorda(Point2D p) {
+    private Point2D novoPontoAlemDaBorda(Point2D p) {
         double x = (p.getX() + unidadeLargura * larguraJogo) % (unidadeLargura * larguraJogo);
         double y = (p.getY() + unidadeAltura * alturaJogo) % (unidadeAltura * alturaJogo);
         return new Point2D(x, y);
     }
     
     
-    
-    // <editor-fold defaultstate="collapsed" desc="getters da cobrinha">
+    //getters da cobrinha
     public List<Point2D> getCorpoCobrinha() {
         return corpoCobrinha;
     }
@@ -165,6 +163,5 @@ public class Cobrinha {
     public int getTamanho() {
         return corpoCobrinha.size();
     }
-    // </editor-fold>
 
 }
