@@ -8,6 +8,7 @@ import com.mycompany.snakegame.controle.ApplicationController;
 
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -18,8 +19,10 @@ import javafx.scene.paint.Color;
 
 
 public class DesenhoCampoJogo {
-    private static DesenhoCampoJogo desenhoCampoJogo;
+	private static DesenhoCampoJogo desenhoCampoJogo;
     private final ApplicationController applicationController;
+    
+    private final String CAMINHO_SNAKE_GRAPHICS = "/com/mycompany/snakegame/snake-graphics.png";
     
     // Direções possíveis da cobrinha
     public final Point2D DIREITA;
@@ -77,7 +80,7 @@ public class DesenhoCampoJogo {
         CIMA = new Point2D(0, -unidadeAltura);
         BAIXO = new Point2D(0, unidadeAltura);
         
-        imagemCompleta = new Image(getClass().getResourceAsStream("/com/mycompany/snakegame/snake-graphics.png"));
+        imagemCompleta = new Image(getClass().getResourceAsStream(CAMINHO_SNAKE_GRAPHICS));
         
         inicializarMaps();
         inicializarDesenho();
@@ -112,28 +115,32 @@ public class DesenhoCampoJogo {
     			ESQUERDA, criarPonto(3, 1),
     			BAIXO, criarPonto(4, 1)
         ));
-
+        
+        popularImagens();
+    }
+    
+    private void popularImagens() {
         mapaImagens = new HashMap<>();
         // Itera sobre a imagem original para criar imagens seções de imagens redimensionadas e as armazena no mapa
         for (int x = 0; x < imagemCompleta.getWidth(); x += 64) {
             for (int y = 0; y < imagemCompleta.getHeight(); y += 64) {
             	int posImagemX = x/64;
             	int posImagemY = y/64;
-            	String coordenadas = criarPonto(posImagemX, posImagemY);
+            	String coordenada = criarPonto(posImagemX, posImagemY);
                 if(posImagemX==1 && posImagemY==2) {
                     Image subImagem = cortarImagem(imagemCompleta, x, y, 64, 64);
                     Image imagemRedimensionada = redimensionarImagem(subImagem, xMargem, yMargem);
-                    mapaImagens.put(coordenadas, imagemRedimensionada);
+                    mapaImagens.put(coordenada, imagemRedimensionada);
                 }
                 else if(posImagemX==0 && posImagemY==2) {
                     Image subImagem = cortarImagem(imagemCompleta, x, y+64, 64, 64);
                     Image imagemRedimensionada = redimensionarImagem(subImagem, unidadeLargura*2, unidadeAltura*2);
-                    mapaImagens.put(coordenadas, imagemRedimensionada);
+                    mapaImagens.put(coordenada, imagemRedimensionada);
                 }
                 else {
                     Image subImagem = cortarImagem(imagemCompleta, x, y, 64, 64);
                     Image imagemRedimensionada = redimensionarImagem(subImagem, unidadeLargura, unidadeAltura);
-                    mapaImagens.put(coordenadas, imagemRedimensionada);
+                    mapaImagens.put(coordenada, imagemRedimensionada);
                 }
             }
         }
@@ -156,7 +163,10 @@ public class DesenhoCampoJogo {
         imageView.setFitWidth(novaLargura);
         imageView.setFitHeight(novaAltura);
         
-        Image imagemRedimensionada = imageView.snapshot(null, null);
+        SnapshotParameters sp = new SnapshotParameters();
+        sp.setFill(Color.TRANSPARENT);
+        Image imagemRedimensionada = imageView.snapshot(sp, null);
+        
         return imagemRedimensionada;
     }
     
