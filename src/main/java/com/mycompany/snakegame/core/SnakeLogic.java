@@ -16,7 +16,7 @@ public class SnakeLogic {
 	private Cobrinha cobrinha;
     private Maca maca;
 	
-	private Random random = new Random();
+	private final Random random = new Random();
 	
 	private EstadosAceleracao estadoAceleracao;
     private final EstadosAceleracao estadoAcelerando = EstadosAceleracao.ACELERANDO;
@@ -80,6 +80,8 @@ public class SnakeLogic {
             estadoAceleracao = estadoDesacelerando;
     	}
     }
+    
+    //Método que executa a cada ciclo do game.
     
     public boolean executar() {
 
