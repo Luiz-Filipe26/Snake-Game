@@ -1,20 +1,18 @@
 
 package com.mycompany.snakegame.controle;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.mycompany.snakegame.banco.GerenciadorRecordes;
 import com.mycompany.snakegame.core.Cobrinha;
 import com.mycompany.snakegame.core.DesenhoCampoJogo;
-import com.mycompany.snakegame.core.Maca;
 import com.mycompany.snakegame.core.GerenciadorJogo;
-import com.mycompany.snakegame.view.SnakeFXMLController;
+import com.mycompany.snakegame.core.Maca;
+
+import fxmlController.SnakeClassicoView;
 
 public class ApplicationController {
     
     private static ApplicationController applicationController;
-    private SnakeFXMLController snakeFxmlController;
+    private SnakeClassicoView snakeFxmlController;
     private GerenciadorJogo gerenciadorJogo;
     private DesenhoCampoJogo desenhoCampoJogo;
     
@@ -28,40 +26,16 @@ public class ApplicationController {
     
     private ApplicationController() {}
     
-    public void adicionarSnakeFXMLController(SnakeFXMLController snakeFxmlController) {
+    public void setSnakeFXMLController(SnakeClassicoView snakeFxmlController) {
         this.snakeFxmlController = snakeFxmlController;
     }
     
-    public void adicionarDesenhoCampoJogo(DesenhoCampoJogo desenhoCampoJogo) {
+    public void setDesenhoCampoJogo(DesenhoCampoJogo desenhoCampoJogo) {
         this.desenhoCampoJogo = desenhoCampoJogo;
     }
     
-    public void setSnakeLogic(GerenciadorJogo gerenciadorJogo) {
+    public void setGerenciadorJogo(GerenciadorJogo gerenciadorJogo) {
         this.gerenciadorJogo = gerenciadorJogo;
-    }
-    
-    public double getCanvasLargura() {
-        return snakeFxmlController.getCanvasLargura();
-    }
-    
-    public double getCanvasAltura() {
-        return snakeFxmlController.getCanvasAltura();
-    }
-    
-    public double getUnidadeLargura() {
-        return gerenciadorJogo.getUnidadeLargura();
-    }
-    
-    public double getUnidadeAltura() {
-        return gerenciadorJogo.getUnidadeAltura();
-    }
-    
-    public double getXMargem() {
-        return gerenciadorJogo.getXMargem();
-    }
-    
-    public double getYMargem() {
-        return gerenciadorJogo.getYMargem();
     }
     
     public void keyPressed(String keyCode) {
@@ -80,7 +54,7 @@ public class ApplicationController {
     	gerenciadorJogo.fecharJogo();
     }
 
-    public void viewFechada() {
+    public void jogoClassicoFechado() {
     	gerenciadorJogo.viewFechada();
     }
 

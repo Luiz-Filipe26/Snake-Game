@@ -1,16 +1,15 @@
-package com.mycompany.snakegame.view;
+package fxmlController;
 
-import com.mycompany.snakegame.controle.ApplicationController;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import com.mycompany.snakegame.controle.ApplicationController;
+import com.mycompany.snakegame.core.CarregaValores;
+
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -19,10 +18,8 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
-public class SnakeFXMLController implements Initializable{
+public class SnakeClassicoView implements Initializable{
 
     @FXML
     private AnchorPane anchorPane;
@@ -34,6 +31,8 @@ public class SnakeFXMLController implements Initializable{
     private Button buttonNovoJogo;
     @FXML
     private Button buttonSalvarRecorde;
+    @FXML
+    private Button buttonVoltar;
     @FXML
     private Canvas canvasGrafico;
     @FXML
@@ -54,6 +53,11 @@ public class SnakeFXMLController implements Initializable{
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+    	
+    	CarregaValores cv = CarregaValores.getInstancia();
+    	if(cv.getCanvasLargura() == 0) {
+    		cv.setCanvasLarguraAltura(canvasGrafico.getWidth(), canvasGrafico.getHeight());
+    	}
         
         applicationController = ApplicationController.getInstancia();
         anchorPane.requestFocus();
@@ -66,29 +70,6 @@ public class SnakeFXMLController implements Initializable{
             dificuldade = novoValor.intValue();
             labelDificuldade.setText("Dificuldade: " + dificuldade);
         });
-    }
-    
-    @FXML
-    public void mostrarRecordes(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/snakegame/RecordesView.fxml"));
-            Parent root = loader.load();
-            RecordesFXMLController rfc = loader.getController();
-            
-
-            Scene scene = new Scene(root);
-            Stage stage = new Stage();
-            stage.setScene(scene);
-            stage.setTitle("Recordes");
-            stage.initStyle(StageStyle.UNDECORATED);
-
-            Stage mainStage = (Stage) anchorPane.getScene().getWindow();
-            mainStage.hide();
-            rfc.setMainStage(mainStage);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @FXML
@@ -125,14 +106,6 @@ public class SnakeFXMLController implements Initializable{
     @FXML
     public void focarCanvas(MouseEvent event) {
         anchorPane.requestFocus();
-    }
-    
-    public double getCanvasLargura() {
-        return canvasGrafico.getWidth();
-    }
-    
-    public double getCanvasAltura() {
-        return canvasGrafico.getHeight();
     }
     
     public void notificaNovoRecorde(int pontos) {

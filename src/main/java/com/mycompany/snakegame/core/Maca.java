@@ -16,11 +16,12 @@ public class Maca {
     private final double larguraJogo;
     private final double alturaJogo;
     
-    public Maca(Cobrinha cobrinha, double unidadeLargura, double unidadeAltura, double larguraJogo, double alturaJogo) {
-        this.unidadeLargura = unidadeLargura;
-        this.unidadeAltura = unidadeAltura;
-        this.larguraJogo = larguraJogo;
-        this.alturaJogo = alturaJogo;
+    public Maca(Cobrinha cobrinha) {
+    	CarregaValores cv = CarregaValores.getInstancia();
+        this.unidadeLargura = cv.getUnidadeLargura();
+        this.unidadeAltura = cv.getUnidadeAltura();
+        this.larguraJogo = cv.getLarguraJogo();
+        this.alturaJogo = cv.getAlturaJogo();
         this.cobrinha = cobrinha;
         gerarPosicaoMaca(false);
     }

@@ -1,34 +1,20 @@
 
 package com.mycompany.snakegame.core;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.mycompany.snakegame.controle.ApplicationController;
 
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
 
 public class DesenhoCampoJogo {
 	private static DesenhoCampoJogo desenhoCampoJogo;
-    private final ApplicationController applicationController;
-    
-    private final String CAMINHO_SNAKE_GRAPHICS = "/com/mycompany/snakegame/snake-graphics.png";
-    
-    // Direções possíveis da cobrinha
-    public final Point2D DIREITA;
-    public final Point2D ESQUERDA;
-    public final Point2D CIMA;
-    public final Point2D BAIXO;
     
     // Variáveis relacionadas às dimensões do jogo
     private final double unidadeLargura;
@@ -43,135 +29,46 @@ public class DesenhoCampoJogo {
     private Canvas canvasBuffer;
     private GraphicsContext gBuffer;
     
-    //Imagem completa de sprites da cobrinha
-    private final Image imagemCompleta;
+
+    private final Map<String, Image> mapaImagens;
+    private final Map<String, String> mapaCauda;
+    private final Map<Point2D, String> mapaCaudaPonta;
+    private final Map<Point2D, String> mapaCabeca;
     
-    private Map<String, String> mapaCauda;
-    private Map<Point2D, String> mapaCaudaPonta;
-    private Map<Point2D, String> mapaCabeca;
-    private Map<String, Image> mapaImagens;
-    
-    // Método para obter a instância única da classe
     public static synchronized DesenhoCampoJogo getInstancia() {
-        return getInstancia(null);
-    }
-    
-    public static synchronized DesenhoCampoJogo getInstancia(GraphicsContext graphicsContext) {
         if (desenhoCampoJogo == null) {
-            desenhoCampoJogo = new DesenhoCampoJogo(graphicsContext);
+            desenhoCampoJogo = new DesenhoCampoJogo();
         }
         return desenhoCampoJogo;
     }
     
     // Construtor privado para garantir apenas uma instância
-    private DesenhoCampoJogo(GraphicsContext graphicsContext) {
-        gc = graphicsContext;
-        applicationController = ApplicationController.getInstancia();
+	@SuppressWarnings("unchecked")
+	private DesenhoCampoJogo() {
         
-        unidadeLargura = applicationController.getUnidadeLargura();
-        unidadeAltura = applicationController.getUnidadeAltura();
-        xMargem = applicationController.getXMargem();
-        yMargem = applicationController.getYMargem();
-        larguraJogo = applicationController.getCanvasLargura() - 2 * xMargem;
-        alturaJogo = applicationController.getCanvasAltura() - 2 * yMargem;
+        CarregaValores cv = CarregaValores.getInstancia();
         
-        DIREITA = new Point2D(unidadeLargura, 0);
-        ESQUERDA = new Point2D(-unidadeLargura, 0);
-        CIMA = new Point2D(0, -unidadeAltura);
-        BAIXO = new Point2D(0, unidadeAltura);
+        unidadeLargura = cv.getUnidadeLargura();
+        unidadeAltura = cv.getUnidadeAltura();
+        xMargem = cv.getXMargem();
+        yMargem = cv.getYMargem();
+        larguraJogo = cv.getCanvasLargura() - 2 * xMargem;
+        alturaJogo = cv.getCanvasAltura() - 2 * yMargem;
         
-        imagemCompleta = new Image(getClass().getResourceAsStream(CAMINHO_SNAKE_GRAPHICS));
-        
-        inicializarMaps();
-        inicializarDesenho();
+        mapaImagens = cv.getMapas()[0];
+        mapaCauda = cv.getMapas()[1];
+        mapaCaudaPonta = cv.getMapas()[2];
+        mapaCabeca = cv.getMapas()[3];
     }
     
-    // Método para inicializar os mapas que mapeiam relações de direção e partes da cobrinha
-    private void inicializarMaps() {
-    	String direita = DIREITA.toString();
-    	String esquerda = ESQUERDA.toString();
-    	String cima = CIMA.toString();
-    	String baixo = BAIXO.toString();
-    	
-        mapaCauda = new HashMap<>(Map.of(
-        		direita + direita, criarPonto(1, 0),
-        		cima + cima, criarPonto(2, 1),
-        		esquerda + cima, criarPonto(0, 1),
-        		cima + direita, criarPonto(0, 0),
-        		direita + baixo, criarPonto(2, 0),
-        		baixo + esquerda, criarPonto(2, 2)
-        		));
-        
-        mapaCaudaPonta = new HashMap<>(Map.of(
-        		CIMA, criarPonto(3, 2),
-        		DIREITA, criarPonto(4, 2),
-        		ESQUERDA, criarPonto(3, 3),
-        		BAIXO, criarPonto(4, 3)
-        		));
 
-        mapaCabeca = new HashMap<>(Map.of(
-        		CIMA, criarPonto(3, 0),
-        		DIREITA, criarPonto(4, 0),
-    			ESQUERDA, criarPonto(3, 1),
-    			BAIXO, criarPonto(4, 1)
-        ));
-        
-        popularImagens();
-    }
-    
-    private void popularImagens() {
-        mapaImagens = new HashMap<>();
-        // Itera sobre a imagem original para criar imagens seções de imagens redimensionadas e as armazena no mapa
-        for (int x = 0; x < imagemCompleta.getWidth(); x += 64) {
-            for (int y = 0; y < imagemCompleta.getHeight(); y += 64) {
-            	int posImagemX = x/64;
-            	int posImagemY = y/64;
-            	String coordenada = criarPonto(posImagemX, posImagemY);
-                if(posImagemX==1 && posImagemY==2) {
-                    Image subImagem = cortarImagem(imagemCompleta, x, y, 64, 64);
-                    Image imagemRedimensionada = redimensionarImagem(subImagem, xMargem, yMargem);
-                    mapaImagens.put(coordenada, imagemRedimensionada);
-                }
-                else if(posImagemX==0 && posImagemY==2) {
-                    Image subImagem = cortarImagem(imagemCompleta, x, y+64, 64, 64);
-                    Image imagemRedimensionada = redimensionarImagem(subImagem, unidadeLargura*2, unidadeAltura*2);
-                    mapaImagens.put(coordenada, imagemRedimensionada);
-                }
-                else {
-                    Image subImagem = cortarImagem(imagemCompleta, x, y, 64, 64);
-                    Image imagemRedimensionada = redimensionarImagem(subImagem, unidadeLargura, unidadeAltura);
-                    mapaImagens.put(coordenada, imagemRedimensionada);
-                }
-            }
-        }
-    }
-    
     private String criarPonto(int x, int y) {
     	return "(" + x + ", " + y + ")";
     }
-    
-    private Image cortarImagem(Image imagemOriginal, int x, int y, int dx, int dy) {
-        PixelReader pixelReader = imagemOriginal.getPixelReader();
-        Image imagemCortada = new WritableImage(pixelReader, x, y, dx, dy);
-        return imagemCortada;
-    }
-    
-    private Image redimensionarImagem(Image imagemOriginal, double novaLargura, double novaAltura) {
-        ImageView imageView = new ImageView(imagemOriginal);
-        imageView.setSmooth(true);
-        imageView.setPreserveRatio(true);
-        imageView.setFitWidth(novaLargura);
-        imageView.setFitHeight(novaAltura);
-        
-        SnapshotParameters sp = new SnapshotParameters();
-        sp.setFill(Color.TRANSPARENT);
-        Image imagemRedimensionada = imageView.snapshot(sp, null);
-        
-        return imagemRedimensionada;
-    }
-    
     //Cria uma imagem com fundo limpo com o desenho da margem em volta
-    private void inicializarDesenho() {
+    public void inicializarDesenho(GraphicsContext gc) {
+    	this.gc = gc;
+    	
         double largura = 2*xMargem + larguraJogo;
         double altura = 2*yMargem + alturaJogo;
         //Cria o canvas que vai servir de buffer para fazer o pré-processamento do desenho

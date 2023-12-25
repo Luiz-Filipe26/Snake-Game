@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.mycompany.snakegame.controle.ApplicationController;
-
 import javafx.geometry.Point2D;
 
 public class Cobrinha {
@@ -35,12 +33,12 @@ public class Cobrinha {
     public Cobrinha() {
         direcoesCobrinha = new HashMap<>();
         
-        ApplicationController applicationController = ApplicationController.getInstancia();
+        CarregaValores cv = CarregaValores.getInstancia();
         
-        unidadeLargura = applicationController.getUnidadeLargura();
-        unidadeAltura = applicationController.getUnidadeAltura();
-        larguraJogo = (applicationController.getCanvasLargura() - 2 * applicationController.getXMargem());
-        alturaJogo = (applicationController.getCanvasAltura() - 2 * applicationController.getYMargem());
+        unidadeLargura =cv.getUnidadeLargura();
+        unidadeAltura = cv.getUnidadeAltura();
+        larguraJogo = (cv.getCanvasLargura() - 2 * cv.getXMargem());
+        alturaJogo = (cv.getCanvasAltura() - 2 * cv.getYMargem());
         
         DIREITA = new Point2D(unidadeLargura, 0);
         ESQUERDA = new Point2D(-unidadeLargura, 0);

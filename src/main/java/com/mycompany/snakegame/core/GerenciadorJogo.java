@@ -16,8 +16,8 @@ public class GerenciadorJogo extends Thread {
     private final Object lock = new Object();
     private final Queue<Point2D> direcoesTeclado = new LinkedList<>();
 
-    private final double UNIDADE_LARGURA = 30;
-    private final double UNIDADE_ALTURA = 30;
+    private final double UNIDADE_LARGURA = CarregaValores.getInstancia().getUnidadeLargura();
+    private final double UNIDADE_ALTURA = CarregaValores.getInstancia().getUnidadeAltura();
     
     public final Point2D DIREITA  = new Point2D(UNIDADE_LARGURA, 0);
     public final Point2D ESQUERDA = new Point2D(-UNIDADE_LARGURA, 0);
@@ -33,10 +33,6 @@ public class GerenciadorJogo extends Thread {
 	private boolean atravessarBordas;
     private float dificuldade;
     
-    private final double xMargem = 20;
-    private final double yMargem = 20;
-    private double laruraJogo;
-    private double alturaJogo;
     private double areaJogo;
     
     private boolean jogoFechado;
@@ -48,9 +44,11 @@ public class GerenciadorJogo extends Thread {
 
     public GerenciadorJogo() {
     	
-        alturaJogo = (applicationController.getCanvasAltura() - 2*xMargem) / UNIDADE_ALTURA;
-        laruraJogo = (applicationController.getCanvasLargura() - 2*yMargem) / UNIDADE_LARGURA;
-        areaJogo = laruraJogo * alturaJogo;
+    	CarregaValores cv = CarregaValores.getInstancia();
+    	
+        double alturaJogo = cv.getAlturaJogo();
+        double larguraJogo = cv.getLarguraJogo();
+        areaJogo = larguraJogo * alturaJogo;
 
         taxaAumento = (float) (DIFERENCA_VELOCIDADE_POR_DIFICULDADE * NIVEIS_SUBIDOS_EM_UM_JOGO / areaJogo);
 
@@ -86,7 +84,7 @@ public class GerenciadorJogo extends Thread {
     private SnakeLogic inicializarGameLogic() {
     	Cobrinha cobrinha = new Cobrinha();
         cobrinha.setPodeAtravessarBordas(atravessarBordas);
-    	Maca maca = new Maca(cobrinha, UNIDADE_LARGURA, UNIDADE_ALTURA, laruraJogo, alturaJogo);
+    	Maca maca = new Maca(cobrinha);
     	float velocidadeInicial = VELOCIDADE_PADRAO + DIFERENCA_VELOCIDADE_POR_DIFICULDADE * (dificuldade - DIFICULDADE_PADRAO);
     	 	
     	SnakeLogic snakeLogic = new SnakeLogic(cobrinha, velocidadeInicial, maca, taxaAumento, areaJogo);
@@ -104,23 +102,6 @@ public class GerenciadorJogo extends Thread {
         	long tempoEspera = (long) (1000 / snakeLogic.getVelocidade());
         	esperar(tempoEspera);
         }
-    }
-    
-    
-    public double getUnidadeLargura() {
-        return UNIDADE_LARGURA;
-    }
-    
-    public double getUnidadeAltura() {
-        return UNIDADE_ALTURA;
-    }
-
-    public double getXMargem() {
-        return xMargem;
-    }
-
-    public double getYMargem() {
-        return yMargem;
     }
 
     

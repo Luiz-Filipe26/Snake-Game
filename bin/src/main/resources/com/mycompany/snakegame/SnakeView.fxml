@@ -8,7 +8,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane fx:id="anchorPane" focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="532.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.snakegame.view.SnakeFXMLController">
+<AnchorPane fx:id="anchorPane" focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="532.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fxmlController.SnakeClassicoView">
    <children>
       <Canvas fx:id="canvasGrafico" height="280.0" layoutX="40.0" layoutY="55.0" onMouseEntered="#focarCanvas" width="520.0" />
       <Button fx:id="buttonNovoJogo" focusTraversable="false" layoutX="192.0" layoutY="361.0" mnemonicParsing="false" onAction="#novoJogoPressionado" text="Novo Jogo" />
