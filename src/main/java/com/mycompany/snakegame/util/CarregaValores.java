@@ -1,4 +1,4 @@
-package com.mycompany.snakegame.core;
+package com.mycompany.snakegame.util;
 
 import java.util.HashMap;
 import java.util.Map;

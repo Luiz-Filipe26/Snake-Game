@@ -3,7 +3,9 @@ package com.mycompany.snakegame.core;
 
 import java.util.Map;
 
-import com.mycompany.snakegame.controle.ApplicationController;
+import com.mycompany.snakegame.entidades.Cobrinha;
+import com.mycompany.snakegame.entidades.Maca;
+import com.mycompany.snakegame.util.CarregaValores;
 
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
@@ -17,12 +19,12 @@ public class DesenhoCampoJogo {
 	private static DesenhoCampoJogo desenhoCampoJogo;
     
     // Variáveis relacionadas às dimensões do jogo
-    private final double unidadeLargura;
-    private final double unidadeAltura;
-    private final double larguraJogo;
-    private final double alturaJogo;
-    private final double xMargem;
-    private final double yMargem;
+    private final double UNIDADE_LARGURA;
+    private final double UNIDADE_ALTURA;
+    private final double LARGURA_JOGO;
+    private final double ALTURA_JOGO;
+    private final double X_MARGEM;
+    private final double Y_MARGEM;
     
     //Objetos para desenho
     private GraphicsContext gc;
@@ -48,12 +50,12 @@ public class DesenhoCampoJogo {
         
         CarregaValores cv = CarregaValores.getInstancia();
         
-        unidadeLargura = cv.getUnidadeLargura();
-        unidadeAltura = cv.getUnidadeAltura();
-        xMargem = cv.getXMargem();
-        yMargem = cv.getYMargem();
-        larguraJogo = cv.getCanvasLargura() - 2 * xMargem;
-        alturaJogo = cv.getCanvasAltura() - 2 * yMargem;
+        UNIDADE_LARGURA = cv.getUnidadeLargura();
+        UNIDADE_ALTURA = cv.getUnidadeAltura();
+        X_MARGEM = cv.getXMargem();
+        Y_MARGEM = cv.getYMargem();
+        LARGURA_JOGO = cv.getCanvasLargura() - 2 * X_MARGEM;
+        ALTURA_JOGO = cv.getCanvasAltura() - 2 * Y_MARGEM;
         
         mapaImagens = cv.getMapas()[0];
         mapaCauda = cv.getMapas()[1];
@@ -69,36 +71,36 @@ public class DesenhoCampoJogo {
     public void inicializarDesenho(GraphicsContext gc) {
     	this.gc = gc;
     	
-        double largura = 2*xMargem + larguraJogo;
-        double altura = 2*yMargem + alturaJogo;
+        double largura = 2*X_MARGEM + LARGURA_JOGO;
+        double altura = 2*Y_MARGEM + ALTURA_JOGO;
         //Cria o canvas que vai servir de buffer para fazer o pré-processamento do desenho
-        canvasBuffer = new Canvas(larguraJogo, alturaJogo);
+        canvasBuffer = new Canvas(LARGURA_JOGO, ALTURA_JOGO);
         gBuffer = canvasBuffer.getGraphicsContext2D();
         
         //Dois loops para desenhar a margem do jogo
         Image imagemFundo = mapaImagens.get(criarPonto(1, 2));
-        for(int x=0; x<largura; x+=xMargem) {
+        for(int x=0; x<largura; x+=X_MARGEM) {
             gc.drawImage(imagemFundo, x, 0);
-            gc.drawImage(imagemFundo, x, altura-yMargem);
+            gc.drawImage(imagemFundo, x, altura-Y_MARGEM);
         }
 
-        for(int y=0; y<altura; y+=yMargem) {
+        for(int y=0; y<altura; y+=Y_MARGEM) {
             gc.drawImage(imagemFundo, 0, y);
-            gc.drawImage(imagemFundo, largura-xMargem, y);
+            gc.drawImage(imagemFundo, largura-X_MARGEM, y);
         }
 
         gBuffer.setFill(Color.WHITE);
-        gBuffer.fillRect(0, 0, larguraJogo, alturaJogo);
-        gc.drawImage(canvasBuffer.snapshot(null, null), xMargem, yMargem);
+        gBuffer.fillRect(0, 0, LARGURA_JOGO, ALTURA_JOGO);
+        gc.drawImage(canvasBuffer.snapshot(null, null), X_MARGEM, Y_MARGEM);
     }
     
     //Limpa a tela ao criar um novo jogo
     public void novoJogo() {
         gBuffer.setFill(Color.WHITE);
-        gBuffer.fillRect(0, 0, (unidadeLargura*larguraJogo), (unidadeAltura*alturaJogo));
+        gBuffer.fillRect(0, 0, (UNIDADE_LARGURA*LARGURA_JOGO), (UNIDADE_ALTURA*ALTURA_JOGO));
         
         Platform.runLater(() -> {
-            gc.drawImage(canvasBuffer.snapshot(null, null), xMargem, yMargem);
+            gc.drawImage(canvasBuffer.snapshot(null, null), X_MARGEM, Y_MARGEM);
         });
     }
     
@@ -143,7 +145,7 @@ public class DesenhoCampoJogo {
         
         //Atualiza a tela com o desenho do buffer
         Platform.runLater(() -> {
-            gc.drawImage(canvasBuffer.snapshot(null, null), xMargem, yMargem);
+            gc.drawImage(canvasBuffer.snapshot(null, null), X_MARGEM, Y_MARGEM);
         });
     }
     
@@ -153,7 +155,7 @@ public class DesenhoCampoJogo {
     }
     
     private void desenhaPonto(Point2D p) {
-        gBuffer.fillRect(p.getX(), p.getY(), unidadeLargura, unidadeAltura);
+        gBuffer.fillRect(p.getX(), p.getY(), UNIDADE_LARGURA, UNIDADE_ALTURA);
     }
     
     private Image getCabecaImagem(Point2D direcao) {        

@@ -7,6 +7,8 @@ import java.util.Random;
 
 import com.mycompany.snakegame.controle.ApplicationController;
 import com.mycompany.snakegame.core.GerenciadorJogo.EstadosAceleracao;
+import com.mycompany.snakegame.entidades.Cobrinha;
+import com.mycompany.snakegame.entidades.Maca;
 
 import javafx.geometry.Point2D;
 

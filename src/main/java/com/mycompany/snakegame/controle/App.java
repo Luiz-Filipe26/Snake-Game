@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.mycompany.snakegame.core.ChecadorColisao;
 import com.mycompany.snakegame.core.DesenhoCampoJogo;
 import com.mycompany.snakegame.core.GerenciadorJogo;
+import com.mycompany.snakegame.util.ChecadorColisao;
 
 import fxmlController.SnakeClassicoView;
 import javafx.application.Application;

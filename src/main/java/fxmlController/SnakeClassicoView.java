@@ -4,7 +4,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import com.mycompany.snakegame.controle.ApplicationController;
-import com.mycompany.snakegame.core.CarregaValores;
+import com.mycompany.snakegame.util.CarregaValores;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;

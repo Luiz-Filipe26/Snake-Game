@@ -2,10 +2,10 @@
 package com.mycompany.snakegame.controle;
 
 import com.mycompany.snakegame.banco.GerenciadorRecordes;
-import com.mycompany.snakegame.core.Cobrinha;
 import com.mycompany.snakegame.core.DesenhoCampoJogo;
 import com.mycompany.snakegame.core.GerenciadorJogo;
-import com.mycompany.snakegame.core.Maca;
+import com.mycompany.snakegame.entidades.Cobrinha;
+import com.mycompany.snakegame.entidades.Maca;
 
 import fxmlController.SnakeClassicoView;
 

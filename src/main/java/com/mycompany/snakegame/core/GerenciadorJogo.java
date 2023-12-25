@@ -6,6 +6,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.mycompany.snakegame.controle.ApplicationController;
+import com.mycompany.snakegame.entidades.Cobrinha;
+import com.mycompany.snakegame.entidades.Maca;
+import com.mycompany.snakegame.util.CarregaValores;
 
 import javafx.geometry.Point2D;
 

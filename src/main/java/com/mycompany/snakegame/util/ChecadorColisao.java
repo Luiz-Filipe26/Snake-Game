@@ -1,11 +1,10 @@
-package com.mycompany.snakegame.core;
+package com.mycompany.snakegame.util;
 
 import java.util.List;
 
 import javafx.geometry.Point2D;
 
 public class ChecadorColisao {
-	
 
     private static double unidadeLargura;
     private static double unidadeAltura;
@@ -21,8 +20,6 @@ public class ChecadorColisao {
     	larguraJogo -= cv.getXMargem();
     	alturaJogo -= cv.getYMargem();
     }
-    
-    
 	
 	public static boolean checarMargem(Point2D ponto) {
 		return ponto.getX() < 0 || ponto.getX() > larguraJogo - unidadeLargura || ponto.getY() < 0 || ponto.getY() > alturaJogo - unidadeAltura;

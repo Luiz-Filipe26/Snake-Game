@@ -1,8 +1,12 @@
-package com.mycompany.snakegame.core;
+package com.mycompany.snakegame.entidades;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import com.mycompany.snakegame.util.CarregaValores;
+import com.mycompany.snakegame.util.ChecadorColisao;
+
 import javafx.geometry.Point2D;
 
 public class Maca {
