@@ -32,12 +32,12 @@ public class Maca {
     
     // Limpa a maçã após ser comida
     public List<Point2D> limparMacaComida() {
-    	List<Point2D> pmc = null;
-        if(posicoesMacaComida != null) {
-            pmc = posicoesMacaComida;
+    	if(posicoesMacaComida != null) {
+            List<Point2D> pmc = posicoesMacaComida;
             posicoesMacaComida = null;
+            return pmc;
         }
-        return pmc;
+        return null;
     }
     
     // Obtém a posição atual da maçã
@@ -114,15 +114,16 @@ public class Maca {
             // Gera coordenadas aleatórias para a maçã
             x = unidadeLargura * random.nextInt((int) larguraJogo - (macaGrande ? 1 : 0));
             y = unidadeAltura * random.nextInt((int) alturaJogo - (macaGrande ? 1 : 0));
+            
             posMaca = new Point2D(x, y);
             
             // Cria a lista de posições da maçã
             posicoesMacaAux = new ArrayList<>(List.of(posMaca));
             if (macaGrande) {
             	posicoesMacaAux.addAll(List.of(
-            			posMaca.add(unidadeLargura, 0),
-            			posMaca.add(0, unidadeAltura),
-            			posMaca.add(unidadeLargura, unidadeAltura)));
+        			posMaca.add(unidadeLargura, 0),
+        			posMaca.add(0, unidadeAltura),
+        			posMaca.add(unidadeLargura, unidadeAltura)));
             }
         } while (isPosicaoMacaInvalida(posicoesMacaAux));
 

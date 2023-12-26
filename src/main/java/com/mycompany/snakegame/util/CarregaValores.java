@@ -23,14 +23,14 @@ public class CarregaValores {
     private Map<Point2D, String> mapaCaudaPonta;
     private Map<Point2D, String> mapaCabeca;
     
-    private final double UNIDADE_LARGURA = 30;
-    private final double UNIDADE_ALTURA = 30;
+    private final double UNIDADE_LARGURA = 60;
+    private final double UNIDADE_ALTURA = 60;
     
     private final double X_MARGEM = 20;
     private final double Y_MARGEM = 20;
     
-    private double canvasLargura = 0;
-    private double canvasAltura = 0;
+    private double CANVAS_LARGURA = 520;
+    private double CANVAS_ALTURA = 280;
     
     public final Point2D DIREITA = new Point2D(UNIDADE_LARGURA, 0);
     public final Point2D ESQUERDA = new Point2D(-UNIDADE_LARGURA, 0);
@@ -50,11 +50,6 @@ public class CarregaValores {
 		inicializarMaps();
         popularImagens();
 	};
-
-	public void setCanvasLarguraAltura(double canvasLargura, double canvasAltura) {
-		this.canvasLargura = canvasLargura;
-		this.canvasAltura = canvasAltura;
-	}
 	
 	@SuppressWarnings("rawtypes")
 	public Map[] getMapas() {
@@ -78,19 +73,19 @@ public class CarregaValores {
 	}
 	
 	public double getLarguraJogo() {
-		return (canvasAltura - 2*Y_MARGEM) / UNIDADE_ALTURA;
+		return (CANVAS_LARGURA - 2*X_MARGEM) / UNIDADE_LARGURA;
 	}
 	
 	public double getAlturaJogo() {
-		return (canvasLargura - 2*X_MARGEM) / UNIDADE_LARGURA;
+		return (CANVAS_ALTURA - 2*Y_MARGEM) / UNIDADE_ALTURA;
 	}
 	
 	public double getCanvasLargura() {
-		return canvasLargura;
+		return CANVAS_LARGURA;
 	}
 
 	public double getCanvasAltura() {
-		return canvasAltura;
+		return CANVAS_ALTURA;
 	}
 	
 	private void inicializarMaps() {

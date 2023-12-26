@@ -101,6 +101,7 @@ public class SnakeLogic {
     	}
     	
     	deltaTempoUltimaMaca++;
+    	
         if (maca.comeu()) {
 
         	macasComidas++;

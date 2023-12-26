@@ -39,7 +39,8 @@ public class App extends Application {
     		"#buttonVoltar", "MainMenu.fxml",
     		"#buttonMostrarRecordes", "Recordes.fxml",
     		"#buttonVoltarJogoNiveis", "MainMenu.fxml",
-    		"#buttonModoNiveis", "SnakeNiveis.fxml"));
+    		"#buttonModoNiveis", "SnakeNiveis.fxml",
+    		"#buttonVoltarJogoClassico", "SnakeClassico.fxml"));
     
     private Map<String, String[]> buttonsDaView = new HashMap<>(Map.of(
     		"MainMenu.fxml", new String[]{"#buttonModoClassico", "#buttonModoNiveis"},

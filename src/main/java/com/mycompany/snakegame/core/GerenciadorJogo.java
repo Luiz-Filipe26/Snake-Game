@@ -10,6 +10,7 @@ import com.mycompany.snakegame.entidades.Cobrinha;
 import com.mycompany.snakegame.entidades.Maca;
 import com.mycompany.snakegame.util.CarregaValores;
 
+import javafx.animation.AnimationTimer;
 import javafx.geometry.Point2D;
 
 public class GerenciadorJogo extends Thread {
@@ -40,6 +41,7 @@ public class GerenciadorJogo extends Thread {
     
     private boolean jogoFechado;
     private boolean viewFechada;
+    private long ultimoTempo = 0;
     
     public enum EstadosAceleracao {
         ACELERANDO, ACELERADO, DESACELERANDO, DESACELERADO;
@@ -95,20 +97,35 @@ public class GerenciadorJogo extends Thread {
     }
     
     private void gameLoop() {
-        boolean continuar = true;
+
+        long umSegundo = 1_000_000_000;
         
-    	while (!jogoFechado && continuar) {
-        	snakeLogic.setDirecaoAtual(obterDirecaoTeclado(snakeLogic.getDirecaoAtual()));
-        	
-        	continuar = snakeLogic.executar();
-        	
-        	long tempoEspera = (long) (1000 / snakeLogic.getVelocidade());
-        	esperar(tempoEspera);
-        }
+        new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                long tempoDecorrido = now - ultimoTempo;
+                float tempoEsperar = umSegundo / snakeLogic.getVelocidade();
+
+                if (tempoDecorrido < tempoEsperar) return;
+                
+                ultimoTempo = now;
+
+                snakeLogic.setDirecaoAtual(obterDirecaoTeclado());
+                boolean continuar = snakeLogic.executar();
+                
+                if (!jogoFechado && continuar) return;
+
+            	ultimoTempo = 0;
+            	stop();
+            }
+        }.start();
+        
     }
 
     
-    private Point2D obterDirecaoTeclado(Point2D direcaoAtual) {
+    private Point2D obterDirecaoTeclado() {
+    	
+    	Point2D direcaoAtual = snakeLogic.getDirecaoAtual();
         if(direcaoAtual == null) {
             return DIREITA;
         }
@@ -123,14 +140,6 @@ public class GerenciadorJogo extends Thread {
         }
         
         return direcaoTeclado;
-    }
-    
-    private void esperar(long tempoEspera) {
-        try {
-            Thread.sleep(tempoEspera);
-        } catch (InterruptedException ex) {
-            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
     }
 
     private void esperarAtualizacaoJogo() {
@@ -177,9 +186,6 @@ public class GerenciadorJogo extends Thread {
 
     public void fecharJogo() {
         jogoFechado = true;
-        synchronized (lock) {
-            lock.notify();
-        }
     }
 
     public void viewFechada() {

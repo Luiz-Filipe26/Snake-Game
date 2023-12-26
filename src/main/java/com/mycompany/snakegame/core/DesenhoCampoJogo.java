@@ -64,7 +64,7 @@ public class DesenhoCampoJogo {
     }
     
 
-    private String criarPonto(int x, int y) {
+    private String obterPonto(int x, int y) {
     	return "(" + x + ", " + y + ")";
     }
     //Cria uma imagem com fundo limpo com o desenho da margem em volta
@@ -73,12 +73,13 @@ public class DesenhoCampoJogo {
     	
         double largura = 2*X_MARGEM + LARGURA_JOGO;
         double altura = 2*Y_MARGEM + ALTURA_JOGO;
+        
         //Cria o canvas que vai servir de buffer para fazer o pré-processamento do desenho
         canvasBuffer = new Canvas(LARGURA_JOGO, ALTURA_JOGO);
         gBuffer = canvasBuffer.getGraphicsContext2D();
         
         //Dois loops para desenhar a margem do jogo
-        Image imagemFundo = mapaImagens.get(criarPonto(1, 2));
+        Image imagemFundo = mapaImagens.get(obterPonto(1, 2));
         for(int x=0; x<largura; x+=X_MARGEM) {
             gc.drawImage(imagemFundo, x, 0);
             gc.drawImage(imagemFundo, x, altura-Y_MARGEM);
@@ -117,13 +118,13 @@ public class DesenhoCampoJogo {
                 desenhaPonto(p);
             }
         }
-        
+
         if(maca.temMaca()) {
             if(!maca.isMacaGrande()) {
-                desenhaImageNoPonto(mapaImagens.get(criarPonto(0, 3)), maca.getPosicaoMaca());
+            	desenhaImageNoPonto(mapaImagens.get(obterPonto(0, 3)), maca.getPosicaoMaca());
             }
             else {
-                desenhaImageNoPonto(mapaImagens.get(criarPonto(0, 2)), maca.getPosicaoMaca());
+                desenhaImageNoPonto(mapaImagens.get(obterPonto(0, 2)), maca.getPosicaoMaca());
             }
         }
         

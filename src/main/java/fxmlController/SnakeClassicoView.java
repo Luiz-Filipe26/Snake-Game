@@ -55,9 +55,8 @@ public class SnakeClassicoView implements Initializable{
     public void initialize(URL url, ResourceBundle rb) {
     	
     	CarregaValores cv = CarregaValores.getInstancia();
-    	if(cv.getCanvasLargura() == 0) {
-    		cv.setCanvasLarguraAltura(canvasGrafico.getWidth(), canvasGrafico.getHeight());
-    	}
+    	canvasGrafico.setWidth(cv.getCanvasLargura());
+    	canvasGrafico.setHeight(cv.getCanvasAltura());
         
         applicationController = ApplicationController.getInstancia();
         anchorPane.requestFocus();
